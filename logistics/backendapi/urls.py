@@ -1,10 +1,10 @@
 from django.urls import path
-from .views import 
+from .views import backendapires
 
 
 urlpatterns = [
-    path('', backendapires.as_view(), name="homepage"),
-    path('location/', locationapi.as_view(), name="location"),
+    path('tokens/', backendapires.as_view(), name="homepage"),
+    
     
     
 ]
