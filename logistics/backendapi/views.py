@@ -37,7 +37,7 @@ class backendapigps(APIView):
             # Extract temperature and humidity
             longitude = data.get('longitude')
             latitude = data.get('latitude')
-            timestamp = data.get('timestamp')
+            
 
             # Simple validation check
             if longitude is None or latitude is None:
@@ -47,7 +47,7 @@ class backendapigps(APIView):
             gps_data = gpsData(
                 longitude=longitude,
                 latitude=latitude,
-                timestamp=timestamp
+                
             )
             gps_data.save()
             return Response({"message": "Success", "data": data}, status=status.HTTP_200_OK)
