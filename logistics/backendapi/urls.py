@@ -1,10 +1,10 @@
 from django.urls import path
-from .views import backendapires
+from .views import backendapigps,backendapitoken 
 
 
 urlpatterns = [
-    path('tokens/', backendapires.as_view(), name="homepage"),
-    
+    path('gpsdata/', backendapigps.as_view(), name="gpsdata"),
+    path('tokens/', backendapitoken.as_view(), name="tokens"),
     
     
 ]

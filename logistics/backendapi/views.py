@@ -12,10 +12,10 @@ from rest_framework.views import APIView
 
 
 def homepage(request):
-    return HttpResponse("Agrosat Backend Apis!")
+    return HttpResponse("Logistics Backend Apis!")
 
 @permission_classes([AllowAny])
-class backendapires(APIView):
+class backendapigps(APIView):
     def post(self, request, *args, **kwargs):
         try:
             # Check if request.data is a dictionary (it will be if the content is JSON)
@@ -35,21 +35,21 @@ class backendapires(APIView):
                 print("Extracted Data:", data)
 
             # Extract temperature and humidity
-            temperature = data.get('temperature')
-            humidity = data.get('humidity')
+            longitude = data.get('longitude')
+            latitude = data.get('latitude')
             timestamp = data.get('timestamp')
 
             # Simple validation check
-            if temperature is None or humidity is None:
+            if longitude is None or latitude is None:
                 return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
 
             # Do something with the data (e.g., save to DB or further processing)
-            sensor_data = SensorData(
-                temperature=temperature,
-                humidity=humidity,
+            gps_data = gpsData(
+                longitude=longitude,
+                latitude=latitude,
                 timestamp=timestamp
             )
-            sensor_data.save()
+            gps_data.save()
             return Response({"message": "Success", "data": data}, status=status.HTTP_200_OK)
         
         except Exception as e:
