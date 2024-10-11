@@ -13,7 +13,7 @@ function Login() {
         </div>
         {/* <!-- Right: Login Form --> */}
         <div class="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
-          <h1 class="text-2xl font-semibold mb-4 text-gray-700">Login</h1>
+          <h1 class="text-2xl font-semibold mb-4 text-gray-700">Login here<span className="text-7xl text-red-500">.</span></h1>
           <form action="#" method="POST">
             {/* <!-- Username Input --> */}
             <div class="mb-4 bg-sky-100">
@@ -80,8 +80,8 @@ function Login() {
           <div class="mt-6 text-gray-600">
             <span>
             Don’t have an account yet? </span>
-            <a href="#" class="hover:underline">
-              Sign up Here
+            <a href="/register" class="hover:underline">
+              Sign up here
             </a>
           </div>
         </div>
