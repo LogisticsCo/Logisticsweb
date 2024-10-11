@@ -1,10 +1,8 @@
-
-
 function Login() {
   return (
     <>
       {/* <!-- component --> */}
-      <div class="bg-sky-100 flex justify-center items-center h-screen">
+      <div class="bg-white flex justify-center items-center h-screen overflow-hidden">
         {/* <!-- Left: Image --> */}
         <div class="w-1/2 h-screen hidden lg:block">
           <img
@@ -19,7 +17,7 @@ function Login() {
           <form action="#" method="POST">
             {/* <!-- Username Input --> */}
             <div class="mb-4 bg-sky-100">
-              <label for="username" class="block text-gray-600">
+              <label for="username" class="block text-gray-600 mb-4">
                 Username
               </label>
               <input
@@ -32,7 +30,7 @@ function Login() {
             </div>
             {/* <!-- Password Input --> */}
             <div class="mb-4">
-              <label for="password" class="block text-gray-800">
+              <label for="password" class="block text-gray-600 mb-4">
                 Password
               </label>
               <input
@@ -43,23 +41,31 @@ function Login() {
                 autocomplete="off"
               />
             </div>
-            {/* <!-- Remember Me Checkbox --> */}
-            <div class="mb-4 flex items-center">
-              <input
-                type="checkbox"
-                id="remember"
-                name="remember"
-                class="text-red-500"
-              />
-              <label for="remember" class="text-green-900 ml-2">
-                Remember Me
-              </label>
-            </div>
-            {/* <!-- Forgot Password Link --> */}
-            <div class="mb-6 text-blue-500">
-              <a href="#" class="hover:underline">
-                Forgot Password?
-              </a>
+            <div className="flex justify-between items-center mb-6">
+              {/* <!-- Remember Me Checkbox --> */}
+              <div class="flex items-center">
+                <div class="flex items-center h-5">
+                  <input
+                    id="remember"
+                    type="checkbox"
+                    value=""
+                    class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
+                    required
+                  />
+                </div>
+                <label
+                  for="remember"
+                  class="ms-2 font-medium text-gray-600"
+                >
+                  Remember me
+                </label>
+              </div>
+              {/* <!-- Forgot Password Link --> */}
+              <div class="text-blue-500">
+                <a href="#" class="hover:underline">
+                  Forgot Password?
+                </a>
+              </div>
             </div>
             {/* <!-- Login Button --> */}
             <button
@@ -70,7 +76,7 @@ function Login() {
             </button>
           </form>
           {/* <!-- Sign up  Link --> */}
-          <div class="mt-6 text-green-500 text-center">
+          <div class="mt-6 text-green-500">
             <a href="#" class="hover:underline">
               Sign up Here
             </a>
