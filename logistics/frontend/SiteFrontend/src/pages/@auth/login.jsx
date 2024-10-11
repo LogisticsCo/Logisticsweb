@@ -76,7 +76,9 @@ function Login() {
             </button>
           </form>
           {/* <!-- Sign up  Link --> */}
-          <div class="mt-6 text-green-500">
+          <div class="mt-6 text-gray-600">
+            <span>
+            Don’t have an account yet? </span>
             <a href="#" class="hover:underline">
               Sign up Here
             </a>
