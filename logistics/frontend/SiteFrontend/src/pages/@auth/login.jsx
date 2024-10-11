@@ -13,7 +13,7 @@ function Login() {
         </div>
         {/* <!-- Right: Login Form --> */}
         <div class="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
-          <h1 class="text-2xl font-semibold mb-4">Login</h1>
+          <h1 class="text-2xl font-semibold mb-4 text-gray-700">Login</h1>
           <form action="#" method="POST">
             {/* <!-- Username Input --> */}
             <div class="mb-4 bg-sky-100">
@@ -41,7 +41,7 @@ function Login() {
                 autocomplete="off"
               />
             </div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 text-sm md:text-base">
               {/* <!-- Remember Me Checkbox --> */}
               <div class="flex items-center">
                 <div class="flex items-center h-5">
@@ -55,7 +55,7 @@ function Login() {
                 </div>
                 <label
                   for="remember"
-                  class="ms-2 font-medium text-gray-600"
+                  class="ms-1 md:ms-2 font-medium text-gray-600"
                 >
                   Remember me
                 </label>
