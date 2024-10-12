@@ -38,10 +38,10 @@ function Dashboard() {
             <li>
               <a
                 href="#"
-                class="flex items-center p-1 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                class="flex items-center p-1 rounded-lg text-red-200 hover:bg-red-500 bg-red-500 group"
               >
                 <svg
-                  class="w-4 h-4 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  class="w-4 h-4 text-red-200 transition duration-75 group-hover:text-red-300"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -156,24 +156,17 @@ function Dashboard() {
 
       <div class="p-4 sm:ml-64">
         <div class="border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-          <div class="flex items-center justify-center h-48 mb-4 rounded-2xl bg-gray-50 dark:bg-gray-800">
-            <p class="text-2xl text-gray-400 dark:text-gray-500">
-              <svg
-                class="w-3.5 h-3.5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 18 18"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 1v16M1 9h16"
-                />
-              </svg>
-            </p>
+          <div class="relative flex items-center justify-center h-48 mb-4 overflow-hidden rounded-2xl bg-gray-50 dark:bg-gray-800">
+            <iframe
+              width="100%"
+              height="100%"
+              frameborder="0"
+              marginheight="0"
+              marginwidth="0"
+              id="gmap_canvas"
+              src="https://maps.google.com/maps?width=743&amp;height=400&amp;hl=en&amp;q=%20Nairobi+()&amp;t=&amp;z=12&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+            ></iframe>
+            <div className="w-full h-full absolute bg-red-500/25"></div>
           </div>
           <div class="grid grid-cols-3 gap-4 mb-4">
             <div class=" col-span-2 flex items-center justify-center rounded-2xl bg-gray-50 h-28 dark:bg-gray-800">
