@@ -68,10 +68,12 @@ function Navbar() {
               </li>
             </ul>
           </div>
+          <div className="flex items-center">
+          <input type="text" className="border text-gray-800 border-gray-300 rounded-lg py-2.5 bg-white px-4 me-2 text-sm focus:border focus:border-gray-300" placeholder="Search"/>
           <button
             data-collapse-toggle="navbar-user"
             type="button"
-            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
             aria-controls="navbar-user"
             aria-expanded="false"
           >
@@ -91,7 +93,7 @@ function Navbar() {
                 d="M1 1h15M1 7h15M1 13h15"
               />
             </svg>
-          </button>
+          </button></div>
         </div>
         <div
           class="items-center justify-between hidden w-full"

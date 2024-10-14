@@ -2,7 +2,7 @@ import Navbar from "./navbar/navbar";
 
 function Dashboard() {
   return (
-    <main className="bg-gray-200">
+    <main className="bg-gray-200 min-h-screen">
       <Navbar />
 
       <button
@@ -151,6 +151,8 @@ function Dashboard() {
               </a>
             </li>
           </ul>
+          <div class="mt-4 space-y-2 p-2 w-full h-44 rounded-2xl bg-red-500">
+        </div>
         </div>
       </aside>
 
@@ -169,7 +171,7 @@ function Dashboard() {
             <div className="w-full h-full absolute bg-red-500/25"></div>
           </div>
           <div class="grid grid-cols-3 gap-4 mb-4">
-            <div class=" col-span-2 flex items-center justify-center rounded-2xl bg-gray-50 h-28 dark:bg-gray-800">
+            <div class=" col-span-2 flex items-center justify-center rounded-2xl bg-gray-50 h-36 dark:bg-gray-800">
               <p class="text-2xl text-gray-400 dark:text-gray-500">
                 <svg
                   class="w-3.5 h-3.5"
@@ -188,7 +190,7 @@ function Dashboard() {
                 </svg>
               </p>
             </div>
-            <div class="flex items-center justify-center rounded-2xl bg-gray-50 h-28 dark:bg-gray-800">
+            <div class="flex items-center justify-center rounded-2xl bg-gray-50 h-36 dark:bg-gray-800">
               <p class="text-2xl text-gray-400 dark:text-gray-500">
                 <svg
                   class="w-3.5 h-3.5"
