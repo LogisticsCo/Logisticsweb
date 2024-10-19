@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DropdownButton from "./dropdown";
 
-const OrderCard = ({ orderId, status, times, vehicleType }) => {
+const OrderCard = ({ orderId, status, times, vehicleType, image }) => {
   // Determine status color
   const statusColors = {
     "In Transit": "text-green-400",
@@ -39,11 +39,7 @@ const OrderCard = ({ orderId, status, times, vehicleType }) => {
       </div>
       {/* Right Section */}
       <div>
-        <img
-          src={vehicleImages[vehicleType]}
-          alt="Vehicle"
-          className="h-20 object-contain"
-        />
+        <img src={image} alt="Vehicle" className="h-20 object-contain" />
       </div>
     </div>
   );
@@ -58,30 +54,35 @@ const OrderList = () => {
       status: "In Transit",
       times: { checking: "11:30", inTransit: "03:00", outForDelivery: "04:00" },
       vehicleType: "truck",
+      image: "/truck1.png",
     },
     {
       orderId: "7OCHAQXHA",
       status: "Checking",
       times: { checking: "02:45", inTransit: "04:00", outForDelivery: "05:20" },
       vehicleType: "truck",
+      image: "/truck2.png",
     },
     {
       orderId: "8N016H2USD",
       status: "Completed",
       times: { checking: "08:50", inTransit: "05:00", outForDelivery: "06:30" },
       vehicleType: "van",
+      image: "/truck3.png",
     },
     {
       orderId: "0BLX9XH22",
       status: "In Transit",
       times: { checking: "10:10", inTransit: "11:30", outForDelivery: "02:00" },
       vehicleType: "truck",
+      image: "/truck4.png",
     },
     {
       orderId: "RJVIQSU66",
       status: "Checking",
       times: { checking: "01:20", inTransit: "02:45", outForDelivery: "03:00" },
       vehicleType: "truck",
+      image: "/truck5.png",
     },
   ];
 
@@ -91,7 +92,7 @@ const OrderList = () => {
       : orders.filter((order) => order.status === selectedFilter);
 
   return (
-    <div className="bg-gray-800 p-6 rounded-3xl w-full h-full mx-auto border border-gray-400">
+    <div className="bg-gray-700/50 p-6 rounded-3xl w-full h-full mx-auto border border-gray-700">
       <div className="flex justify-between">
         <div className="text-white font-semibold text-xl mb-4">
           Filter by Partners
@@ -125,7 +126,8 @@ const OrderList = () => {
           orderId={order.orderId}
           status={order.status}
           times={order.times}
-          vehicleType={order.vehicleType}
+          vehicleType={order.image}
+          image={order.image}
         />
       ))}
     </div>

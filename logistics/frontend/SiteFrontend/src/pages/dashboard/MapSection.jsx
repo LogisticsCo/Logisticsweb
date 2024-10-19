@@ -3,7 +3,7 @@ import { FaPhone, FaComment } from "react-icons/fa";
 
 const MapSection = () => {
   return (
-    <div className="relative w-full h-full bg-gray-900 rounded-3xl overflow-hidden border border-gray-400">
+    <div className="relative w-full h-full bg-gray-900 rounded-3xl overflow-hidden border border-gray-400/50">
       {/* Map Section (Placeholder for actual map integration) */}
       <div className="absolute inset-0">
         <div className="h-full w-full relative flex justify-center items-center">
