@@ -1,7 +1,11 @@
-import React from "react";
+import { initFlowbite } from "flowbite";
+import React, { useEffect } from "react";
 import { FaPhone, FaComment } from "react-icons/fa";
 
 const MapSection = ({ orderId }) => {
+  useEffect(() => {
+    initFlowbite();
+  });
   // Define a sample data structure to fetch relevant order details based on orderId
   const orderData = {
     ZZABLJF2Q: {
@@ -54,12 +58,88 @@ const MapSection = ({ orderId }) => {
               <div className="absolute inset-0 rounded-full border-4 border-blue-500 animate-ping"></div>
 
               {/* Profile image */}
-              <div className="bg-blue-500 rounded-full p-3">
+              <button
+                data-popover-target="popover-user-profile"
+                data-popover-placement="top"
+                type="button"
+                className="bg-blue-500 rounded-full p-3"
+              >
                 <img
                   src={activeOrder.driver} // Use active order's image
                   alt="Driver"
                   className="w-10 rounded-full relative z-10" // Ensure image is above the animated border
                 />
+              </button>
+              <div
+                data-popover
+                id="popover-user-profile"
+                role="tooltip"
+                class="absolute z-10 invisible inline-block w-64 text-sm transition-opacity duration-300 border rounded-lg shadow-sm opacity-0 text-gray-400 bg-gray-800 border-gray-600"
+              >
+                <div class="p-3">
+                  <div class="flex items-center justify-between mb-2">
+                    <a href="#">
+                      <img
+                        class="w-10 h-10 rounded-full"
+                        src={activeOrder.driver}
+                        alt="Jese Leos"
+                      />
+                    </a>
+                    <div>
+                      <button
+                        type="button"
+                        class="w-fit inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                      >
+                        <FaPhone className="mr-2" />
+                        Call
+                      </button>
+                    </div>
+                  </div>
+                  <p class="text-base font-semibold leading-none text-white">
+                    <a href="#">Jese Leos</a>
+                  </p>
+                  <p class="mb-3 text-sm font-normal">
+                    <a href="#" class="hover:underline">
+                      @jeseleos
+                    </a>
+                  </p>
+                  <div className="py-3 mb-3">
+                    <p class="mb-2 text-sm font-semibold text-white">
+                      Select Geofence
+                    </p>
+                    <div class="flex items-center space-x-4">
+                      <label class="text-gray-400">
+                        <input
+                          type="radio"
+                          name="geofence"
+                          value="radius"
+                          class="mr-2"
+                          checked
+                        />
+                        Radius
+                      </label>
+                      <label class="text-gray-400">
+                        <input
+                          type="radio"
+                          name="geofence"
+                          value="polygon"
+                          class="mr-2"
+                        />
+                        Polygon
+                      </label>
+                    </div>
+                  </div>
+
+                  <ul class="flex text-sm">
+                    <li class="me-2">
+                      <a href="#" class="hover:underline">
+                        <span class="font-semibold text-white">799</span>
+                        <span> Trips Completed</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div data-popper-arrow></div>
               </div>
             </div>
           </div>
