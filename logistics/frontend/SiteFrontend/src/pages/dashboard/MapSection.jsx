@@ -49,22 +49,22 @@ const MapSection = () => {
         className="absolute top-0 left-0 right-0 p-6 flex flex-col justify-between items-center z-30"
       >
         <div className="flex justify-between items-center w-full">
-          <div className="text-xs 2xl:text-lg font-semibold text-white">
+          <div className="text-xs 2xl:text-sm font-semibold text-white">
             Order ID ZZABLJF2Q
             <span className="text-green-400">(In Transit)</span>
           </div>
           <div className="flex space-x-2">
-            <button className="bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 flex items-center text-xs 2xl:text-lg text-white">
+            <button className="bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 flex items-center text-xs 2xl:text-sm text-white">
               <FaPhone className="mr-2" /> Call Driver
             </button>
-            <button className="bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 flex items-center text-xs 2xl:text-lg text-white">
+            <button className="bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 flex items-center text-xs 2xl:text-sm text-white">
               <FaComment className="mr-2" /> Chat with Driver
             </button>
           </div>
         </div>
         {/* Tabs (Shipping Info, Vehicle Info, etc.) */}
         <div className="w-full mt-4 overflow-x-auto scrollbar-hidden">
-          <div className="flex mb-4 space-x-4 text-xs 2xl:text-lg">
+          <div className="flex mb-4 space-x-4 text-xs 2xl:text-sm">
             <button className="min-w-fit bg-gray-700 text-white rounded-full px-4 py-2 focus:outline-none">
               Shipping Info
             </button>
