@@ -7,28 +7,39 @@ const MapSection = ({ orderId }) => {
     ZZABLJF2Q: {
       status: "In Transit",
       image: "/truck1.png",
+      driver: "/profile1.png",
     },
     "7OCHAQXHA": {
       status: "Checking",
       image: "/truck2.png",
+      driver: "/profile2.png",
     },
     "8N016H2USD": {
       status: "Completed",
       image: "/truck3.png",
+      driver: "/profile1.png",
     },
     "0BLX9XH22": {
       status: "In Transit",
       image: "/truck4.png",
+      driver: "/profile1.png",
     },
     RJVIQSU66: {
       status: "Checking",
       image: "/truck5.png",
+      driver: "/profile1.png",
+    },
+    RJVIQSU67: {
+      status: "In Transit",
+      image: "/truck3.png",
+      driver: "/profile1.png",
     },
   };
 
   const activeOrder = orderData[orderId] || {
     status: "N/A",
     image: "/default-image.png",
+    driver: "/default-image.png",
   };
 
   return (
@@ -45,7 +56,7 @@ const MapSection = ({ orderId }) => {
               {/* Profile image */}
               <div className="bg-blue-500 rounded-full p-3">
                 <img
-                  src={activeOrder.image} // Use active order's image
+                  src={activeOrder.driver} // Use active order's image
                   alt="Driver"
                   className="w-10 rounded-full relative z-10" // Ensure image is above the animated border
                 />
@@ -57,9 +68,6 @@ const MapSection = ({ orderId }) => {
             <iframe
               width="100%"
               height="100%"
-              frameBorder="0"
-              marginHeight="0"
-              marginWidth="0"
               id="gmap_canvas"
               src="https://maps.google.com/maps?width=743&amp;height=400&amp;hl=en&amp;q=%20Nairobi+()&amp;t=&amp;z=12&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
               className="absolute top-0 left-0 w-full h-full"
@@ -120,7 +128,7 @@ const MapSection = ({ orderId }) => {
           <img
             src={activeOrder.image || "https://via.placeholder.com/100"} // Use active order's image
             alt="Truck"
-            className="w-20 h-16 mr-4"
+            className="w-fit h-16 mr-4"
           />
           <div className="w-full">
             <div className="flex bg-gray-300 rounded-full h-4">
