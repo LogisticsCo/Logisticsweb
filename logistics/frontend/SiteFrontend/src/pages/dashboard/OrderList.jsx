@@ -1,22 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import DropdownButton from "./dropdown";
 
-const OrderCard = ({ orderId, status, times, vehicleType, image }) => {
-  // Determine status color
+const OrderCard = ({ orderId, status, times, image, isActive, onClick }) => {
   const statusColors = {
     "In Transit": "text-green-400",
     Checking: "text-yellow-400",
     Completed: "text-blue-400",
   };
 
-  const vehicleImages = {
-    truck: "/path/to/truck-image.png", // Replace with the actual truck image path
-    van: "/path/to/van-image.png", // Replace with the actual van image path
-  };
-
   return (
-    <div className="bg-gray-900 rounded-lg p-4 flex justify-between items-center mb-4">
-      {/* Left Section */}
+    <div
+      onClick={onClick}
+      className={`rounded-lg p-4 flex justify-between items-center mb-4 cursor-pointer ${
+        isActive ? "bg-blue-800 border-2 border-blue-500" : "bg-gray-900"
+      }`}
+    >
       <div className="flex flex-col space-y-2">
         <div className="text-white text-sm font-semibold">
           Order ID {orderId}{" "}
@@ -37,7 +35,6 @@ const OrderCard = ({ orderId, status, times, vehicleType, image }) => {
           </div>
         </div>
       </div>
-      {/* Right Section */}
       <div>
         <img src={image} alt="Vehicle" className="h-20 object-contain" />
       </div>
@@ -45,8 +42,8 @@ const OrderCard = ({ orderId, status, times, vehicleType, image }) => {
   );
 };
 
-const OrderList = () => {
-  const [selectedFilter, setSelectedFilter] = useState("All Orders");
+const OrderList = ({ activeOrderId, setActiveOrderId }) => {
+  const [selectedFilter, setSelectedFilter] = React.useState("All Orders");
 
   const orders = [
     {
@@ -84,6 +81,13 @@ const OrderList = () => {
       vehicleType: "truck",
       image: "/truck5.png",
     },
+    {
+      orderId: "RJVIQSU67",
+      status: "In Transit",
+      times: { checking: "01:20", inTransit: "02:45", outForDelivery: "03:00" },
+      vehicleType: "truck",
+      image: "/truck2.png",
+    },
   ];
 
   const filteredOrders =
@@ -101,33 +105,17 @@ const OrderList = () => {
           <DropdownButton setSelectedOption={setSelectedFilter} />
         </div>
       </div>
-      <div className="bg-gray-700 p-3 rounded-md mb-4">
-        <div className="flex space-x-4 overflow-x-auto">
-          {/* Filters - Replace with real filters */}
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md">
-            Enim pharetra null
-          </button>
-          <button className="bg-gray-800 text-white px-4 py-2 rounded-md">
-            Lacinia mal
-          </button>
-          <button className="bg-gray-800 text-white px-4 py-2 rounded-md">
-            Ornare ornare vivamus
-          </button>
-          <button className="bg-gray-800 text-white px-4 py-2 rounded-md">
-            Ileque convallisar
-          </button>
-        </div>
-      </div>
 
       {/* Order Cards */}
-      {filteredOrders.map((order, index) => (
+      {filteredOrders.map((order) => (
         <OrderCard
-          key={index}
+          key={order.orderId}
           orderId={order.orderId}
           status={order.status}
           times={order.times}
-          vehicleType={order.image}
           image={order.image}
+          isActive={order.orderId === activeOrderId}
+          onClick={() => setActiveOrderId(order.orderId)} // Update active order on click
         />
       ))}
     </div>

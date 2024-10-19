@@ -1,7 +1,36 @@
 import React from "react";
 import { FaPhone, FaComment } from "react-icons/fa";
 
-const MapSection = () => {
+const MapSection = ({ orderId }) => {
+  // Define a sample data structure to fetch relevant order details based on orderId
+  const orderData = {
+    ZZABLJF2Q: {
+      status: "In Transit",
+      image: "/truck1.png",
+    },
+    "7OCHAQXHA": {
+      status: "Checking",
+      image: "/truck2.png",
+    },
+    "8N016H2USD": {
+      status: "Completed",
+      image: "/truck3.png",
+    },
+    "0BLX9XH22": {
+      status: "In Transit",
+      image: "/truck4.png",
+    },
+    RJVIQSU66: {
+      status: "Checking",
+      image: "/truck5.png",
+    },
+  };
+
+  const activeOrder = orderData[orderId] || {
+    status: "N/A",
+    image: "/default-image.png",
+  };
+
   return (
     <div className="relative w-full h-full bg-gray-900 rounded-3xl overflow-hidden border border-gray-400/50">
       {/* Map Section (Placeholder for actual map integration) */}
@@ -16,7 +45,7 @@ const MapSection = () => {
               {/* Profile image */}
               <div className="bg-blue-500 rounded-full p-3">
                 <img
-                  src="/profile1.png"
+                  src={activeOrder.image} // Use active order's image
                   alt="Driver"
                   className="w-10 rounded-full relative z-10" // Ensure image is above the animated border
                 />
@@ -24,18 +53,18 @@ const MapSection = () => {
             </div>
           </div>
 
-          <div class="relative w-full h-full">
+          <div className="relative w-full h-full">
             <iframe
               width="100%"
               height="100%"
-              frameborder="0"
-              marginheight="0"
-              marginwidth="0"
+              frameBorder="0"
+              marginHeight="0"
+              marginWidth="0"
               id="gmap_canvas"
               src="https://maps.google.com/maps?width=743&amp;height=400&amp;hl=en&amp;q=%20Nairobi+()&amp;t=&amp;z=12&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
-              class="absolute top-0 left-0 w-full h-full"
+              className="absolute top-0 left-0 w-full h-full"
             ></iframe>
-            <div class="absolute top-0 left-0 w-full h-full bg-black opacity-50 pointer-events-none"></div>
+            <div className="absolute top-0 left-0 w-full h-full bg-black opacity-50 pointer-events-none"></div>
           </div>
         </div>
       </div>
@@ -50,8 +79,8 @@ const MapSection = () => {
       >
         <div className="flex justify-between items-center w-full">
           <div className="text-xs 2xl:text-sm font-semibold text-white">
-            Order ID ZZABLJF2Q
-            <span className="text-green-400">(In Transit)</span>
+            Order ID {orderId}
+            <span className="text-green-400">({activeOrder.status})</span>
           </div>
           <div className="flex space-x-2">
             <button className="bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 flex items-center text-xs 2xl:text-sm text-white">
@@ -89,7 +118,7 @@ const MapSection = () => {
         {/* Truck Capacity Section */}
         <div className="mb-6 bg-gray-800 p-4 rounded-lg flex items-center">
           <img
-            src="https://via.placeholder.com/100"
+            src={activeOrder.image || "https://via.placeholder.com/100"} // Use active order's image
             alt="Truck"
             className="w-20 h-16 mr-4"
           />
@@ -97,7 +126,7 @@ const MapSection = () => {
             <div className="flex bg-gray-300 rounded-full h-4">
               <div
                 className="bg-blue-500 rounded-full"
-                style={{ width: "60%" }}
+                style={{ width: "60%" }} // Adjust this percentage dynamically as needed
               ></div>
             </div>
 
