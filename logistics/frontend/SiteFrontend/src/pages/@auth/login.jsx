@@ -2,7 +2,7 @@ function Login() {
   return (
     <>
       {/* <!-- component --> */}
-      <div class="bg-white flex justify-center items-center h-screen overflow-hidden">
+      <div class="bg-gray-800 flex justify-center items-center h-screen overflow-hidden">
         {/* <!-- Left: Image --> */}
         <div class="w-1/2 h-screen hidden lg:block">
           <img
@@ -13,11 +13,13 @@ function Login() {
         </div>
         {/* <!-- Right: Login Form --> */}
         <div class="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
-          <h1 class="text-2xl font-semibold mb-4 text-gray-700">Login here<span className="text-7xl text-red-500">.</span></h1>
+          <h1 class="text-2xl font-semibold mb-4 text-gray-300">
+            Login here<span className="text-7xl text-blue-500">.</span>
+          </h1>
           <form action="#" method="POST">
             {/* <!-- Username Input --> */}
             <div class="mb-4 bg-sky-100">
-              <label for="username" class="block text-gray-600 mb-4">
+              <label for="username" class="block text-gray-400 mb-4">
                 Username
               </label>
               <input
@@ -30,7 +32,7 @@ function Login() {
             </div>
             {/* <!-- Password Input --> */}
             <div class="mb-4">
-              <label for="password" class="block text-gray-600 mb-4">
+              <label for="password" class="block text-gray-400 mb-4">
                 Password
               </label>
               <input
@@ -56,7 +58,7 @@ function Login() {
                 </div>
                 <label
                   for="remember"
-                  class="ms-1 md:ms-2 font-medium text-gray-600"
+                  class="ms-1 md:ms-2 font-medium text-gray-400"
                 >
                   Remember me
                 </label>
@@ -71,16 +73,15 @@ function Login() {
             {/* <!-- Login Button --> */}
             <button
               type="submit"
-              class="bg-red-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full"
+              class="mt-10 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-md py-2 px-4 w-full"
             >
               Login
             </button>
           </form>
           {/* <!-- Sign up  Link --> */}
-          <div class="mt-6 text-gray-600">
-            <span>
-            Don’t have an account yet? </span>
-            <a href="/register" class="hover:underline">
+          <div class="mt-6 text-gray-400">
+            <span>Don’t have an account yet? </span>
+            <a href="/register" class="text-white hover:underline">
               Sign up here
             </a>
           </div>

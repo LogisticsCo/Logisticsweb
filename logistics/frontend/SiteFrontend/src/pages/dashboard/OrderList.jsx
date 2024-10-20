@@ -11,9 +11,9 @@ const OrderCard = ({ orderId, status, times, image, isActive, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`rounded-lg p-4 flex justify-between items-center mb-4 cursor-pointer ${
+      className={`rounded-lg p-4 flex justify-between items-center mb-4 cursor-pointer transition-opacity duration-300 ease-in-out ${
         isActive ? "bg-blue-800 border-2 border-blue-500" : "bg-gray-900"
-      }`}
+      } group-hover:opacity-70 hover:!opacity-100`} // Smooth transition
     >
       <div className="flex flex-col space-y-2">
         <div className="text-white text-sm font-semibold">
@@ -107,17 +107,19 @@ const OrderList = ({ activeOrderId, setActiveOrderId }) => {
       </div>
 
       {/* Order Cards */}
-      {filteredOrders.map((order) => (
-        <OrderCard
-          key={order.orderId}
-          orderId={order.orderId}
-          status={order.status}
-          times={order.times}
-          image={order.image}
-          isActive={order.orderId === activeOrderId}
-          onClick={() => setActiveOrderId(order.orderId)} // Update active order on click
-        />
-      ))}
+      <div className="group">
+        {filteredOrders.map((order) => (
+          <OrderCard
+            key={order.orderId}
+            orderId={order.orderId}
+            status={order.status}
+            times={order.times}
+            image={order.image}
+            isActive={order.orderId === activeOrderId}
+            onClick={() => setActiveOrderId(order.orderId)} // Update active order on click
+          />
+        ))}
+      </div>
     </div>
   );
 };
