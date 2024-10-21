@@ -3,6 +3,10 @@ function Signup() {
     <>
       {/* <!-- component --> */}
       <div class="bg-gray-900 flex justify-end items-center h-screen overflow-hidden relative">
+        {/* <!-- Logo Text at the top left corner --> */}
+        <div className="absolute top-4 left-4 text-white text-2xl font-bold z-10">
+          CK Logistics
+        </div>
         {/* <!-- Truck Image covering the whole screen --> */}
         <img
           src="/bgtruck2.jpeg"
