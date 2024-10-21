@@ -6,7 +6,7 @@ function Login() {
         {/* <!-- Left: Image --> */}
         <div class="w-1/2 h-screen hidden lg:block">
           <img
-            src="https://img.freepik.com/fotos-premium/imagen-fondo_910766-187.jpg?w=826"
+            src="/bgtruck.jpeg"
             alt="Placeholder Image"
             class="object-cover w-full h-full"
           />
