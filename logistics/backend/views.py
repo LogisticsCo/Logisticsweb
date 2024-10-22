@@ -22,19 +22,18 @@ def register(request):
     try:
         data = request.data
         username = data['username']
-        email = data['email']
+        
         password = data['password']
         print(data)
         
         if User.objects.filter(username=username).exists():
             return Response({"detail": "User already exists. Log in"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if User.objects.filter(email=email).exists():
-            return Response({"detail": "User with this email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        
 
         user = User.objects.create(
             username=username,
-            email=email,
+            
             password=make_password(password),
         )
         user.save()
@@ -81,7 +80,7 @@ def login(request):
                 'access': str(access),
                 'user': {
                     'username': user.username,
-                    'email': user.email,
+                    
                 }
             }, status=status.HTTP_200_OK)
         else:
