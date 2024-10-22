@@ -1,4 +1,67 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Signup() {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setErrorMessage("");
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match");
+      return;
+    }
+
+    const data = {
+      username,
+      
+      password,
+    };
+
+    try {
+      const response = await fetch(
+        "https://cklogisticsco.onrender.com/backend/register/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const result = await response.json();
+      console.log("Response Status:", response.status);
+      console.log("Response Body:", result); // Log the full response
+
+      if (response.ok) {
+        alert("Registration successful");
+        navigate("/login");
+      } else {
+        // Handle errors returned from the backend
+        if (result.error) {
+          setErrorMessage(result.error);
+        } else if (result.message) {
+          setErrorMessage(result.message);
+        } else if (result.detail) {
+          setErrorMessage(result.detail);
+        } else {
+          setErrorMessage("Registration failed. Please try again.");
+        }
+      }
+    } catch (error) {
+      setErrorMessage("An error occurred. Please try again.");
+    }
+  };
+
+
   return (
     <>
       {/* <!-- component --> */}
@@ -20,7 +83,7 @@ function Signup() {
             <h1 class="text-2xl font-semibold mb-4 text-gray-100">
               Register here<span className="text-7xl text-blue-400">.</span>
             </h1>
-            <form action="#" method="POST">
+            <form onSubmit={handleSubmit}>
               {/* <!-- Username Input --> */}
               <div class="mb-4">
                 <label for="username" class="block text-gray-400 mb-4">
@@ -30,6 +93,8 @@ function Signup() {
                   type="text"
                   id="username"
                   name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   class="text-gray-100 w-full border border-gray-500 rounded-md py-2 px-3 bg-gray-700 placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400"
                   autocomplete="off"
                   placeholder="Enter your username"
@@ -44,6 +109,8 @@ function Signup() {
                   type="password"
                   id="password"
                   name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   class="text-gray-100 w-full border border-gray-500 rounded-md py-2 px-3 bg-gray-700 placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400"
                   autocomplete="off"
                   placeholder="Enter your password"
@@ -56,8 +123,10 @@ function Signup() {
                 </label>
                 <input
                   type="password"
-                  id="password"
-                  name="password"
+                  id="confirm-password"
+                  name="confirm-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   class="text-gray-100 w-full border border-gray-500 rounded-md py-2 px-3 bg-gray-700 placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400"
                   autocomplete="off"
                   placeholder="Repeat your password"
