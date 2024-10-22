@@ -1,4 +1,62 @@
-function Login() {
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const Login = () => {
+    const [formData, setFormData] = useState({
+        username: '',
+        password: ''
+    });
+
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log('Form Submitted');
+
+        try {
+            console.log('Sending Request');
+            const response = await fetch('https://cklogisticsco.onrender.com/backend/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            console.log('Response Status:', response.status);
+
+            const contentType = response.headers.get('Content-Type');
+            const responseBody = await response.text();
+
+            if (response.ok) {
+                const { access, refresh } = JSON.parse(responseBody);
+                localStorage.setItem('accessToken', access);
+                localStorage.setItem('refreshToken', refresh);
+                navigate('/dashboard'); 
+            } else {
+                let errorMessage = 'Error logging in';
+
+                if (contentType && contentType.includes('application/json')) {
+                    const result = JSON.parse(responseBody);
+                    errorMessage = result.error || errorMessage;
+                }
+
+                setError(errorMessage);
+            }
+        } catch (err) {
+            console.error('Fetch Error:', err);
+            setError('Error logging in');
+        }
+    };
   return (
     <>
       {/* <!-- component --> */}
@@ -21,7 +79,7 @@ function Login() {
             <h1 className="text-2xl font-semibold mb-4 text-gray-100">
               Login here<span className="text-7xl text-blue-400">.</span>
             </h1>
-            <form action="#" method="POST">
+            <form onSubmit={handleSubmit} >
               {/* <!-- Username Input --> */}
               <div className="mb-4">
                 <label htmlFor="username" className="block text-gray-400 mb-4">
@@ -31,6 +89,8 @@ function Login() {
                   type="text"
                   id="username"
                   name="username"
+                  value={formData.username}
+                  onChange={handleChange}
                   className="text-gray-100 w-full border border-gray-500 rounded-md py-2 px-3 bg-gray-700 placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400"
                   autoComplete="off"
                   placeholder="Enter your username"
@@ -45,6 +105,8 @@ function Login() {
                   type="password"
                   id="password"
                   name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className="text-gray-100 w-full border border-gray-500 rounded-md py-2 px-3 bg-gray-700 placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400"
                   autoComplete="off"
                   placeholder="Enter your password"
