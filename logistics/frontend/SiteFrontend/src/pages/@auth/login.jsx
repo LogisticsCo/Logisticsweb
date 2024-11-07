@@ -1,62 +1,65 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-    const [formData, setFormData] = useState({
-        username: '',
-        password: ''
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
     });
+  };
 
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Form Submitted");
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        console.log('Form Submitted');
-
-        try {
-            console.log('Sending Request');
-            const response = await fetch('https://cklogisticsco.onrender.com/backend/login/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            console.log('Response Status:', response.status);
-
-            const contentType = response.headers.get('Content-Type');
-            const responseBody = await response.text();
-
-            if (response.ok) {
-                const { access, refresh } = JSON.parse(responseBody);
-                localStorage.setItem('accessToken', access);
-                localStorage.setItem('refreshToken', refresh);
-                navigate('/dashboard'); 
-            } else {
-                let errorMessage = 'Error logging in';
-
-                if (contentType && contentType.includes('application/json')) {
-                    const result = JSON.parse(responseBody);
-                    errorMessage = result.error || errorMessage;
-                }
-
-                setError(errorMessage);
-            }
-        } catch (err) {
-            console.error('Fetch Error:', err);
-            setError('Error logging in');
+    try {
+      console.log("Sending Request");
+      const response = await fetch(
+        "https://cklogisticsco.onrender.com/backend/login/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         }
-    };
+      );
+
+      console.log("Response Status:", response.status);
+
+      const contentType = response.headers.get("Content-Type");
+      const responseBody = await response.text();
+
+      if (response.ok) {
+        const { access, refresh } = JSON.parse(responseBody);
+        localStorage.setItem("accessToken", access);
+        localStorage.setItem("refreshToken", refresh);
+        navigate("/dashboard");
+      } else {
+        let errorMessage = "Error logging in";
+
+        if (contentType && contentType.includes("application/json")) {
+          const result = JSON.parse(responseBody);
+          errorMessage = result.error || errorMessage;
+        }
+
+        setError(errorMessage);
+      }
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setError("Error logging in");
+    }
+  };
   return (
     <>
       {/* <!-- component --> */}
@@ -79,10 +82,10 @@ const Login = () => {
             <h1 className="text-2xl font-semibold mb-4 text-gray-100">
               Login here<span className="text-7xl text-blue-400">.</span>
             </h1>
-            <form onSubmit={handleSubmit} >
+            <form onSubmit={handleSubmit}>
               {/* <!-- Username Input --> */}
               <div className="mb-4">
-                <label htmlFor="username" className="block text-gray-400 mb-4">
+                <label htmlFor="username" className="block text-gray-400 mb-2">
                   Username
                 </label>
                 <input
@@ -98,7 +101,7 @@ const Login = () => {
               </div>
               {/* <!-- Password Input --> */}
               <div className="mb-4">
-                <label htmlFor="password" className="block text-gray-400 mb-4">
+                <label htmlFor="password" className="block text-gray-400 mb-2">
                   Password
                 </label>
                 <input
@@ -159,6 +162,6 @@ const Login = () => {
       </div>
     </>
   );
-}
+};
 
 export default Login;

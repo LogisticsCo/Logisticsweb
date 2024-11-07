@@ -86,7 +86,7 @@ function Signup() {
             <form onSubmit={handleSubmit}>
               {/* <!-- Username Input --> */}
               <div class="mb-4">
-                <label for="username" class="block text-gray-400 mb-4">
+                <label for="username" class="block text-gray-400 mb-2">
                   Username
                 </label>
                 <input
@@ -102,7 +102,7 @@ function Signup() {
               </div>
               {/* <!-- email Input --> */}
               <div class="mb-4">
-                <label for="email" class="block text-gray-400 mb-4">
+                <label for="email" class="block text-gray-400 mb-2">
                   E-mail
                 </label>
                 <input
@@ -117,7 +117,7 @@ function Signup() {
               </div>
               {/* <!-- Password Input --> */}
               <div class="mb-4">
-                <label for="password" class="block text-gray-400 mb-4">
+                <label for="password" class="block text-gray-400 mb-2">
                   Password
                 </label>
                 <input
@@ -133,7 +133,7 @@ function Signup() {
               </div>
               {/* <!-- Repeat Password Input --> */}
               <div class="mb-4">
-                <label for="password" class="block text-gray-400 mb-4">
+                <label for="password" class="block text-gray-400 mb-2">
                   Repeat Password
                 </label>
                 <input
