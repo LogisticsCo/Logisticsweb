@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 function Signup() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
-  
+  const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -21,7 +22,7 @@ function Signup() {
 
     const data = {
       username,
-      
+
       password,
     };
 
@@ -61,7 +62,6 @@ function Signup() {
     }
   };
 
-
   return (
     <>
       {/* <!-- component --> */}
@@ -98,6 +98,21 @@ function Signup() {
                   class="text-gray-100 w-full border border-gray-500 rounded-md py-2 px-3 bg-gray-700 placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400"
                   autocomplete="off"
                   placeholder="Enter your username"
+                />
+              </div>
+              {/* <!-- email Input --> */}
+              <div class="mb-4">
+                <label for="email" class="block text-gray-400 mb-4">
+                  E-mail
+                </label>
+                <input
+                  type="text"
+                  id="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  class="text-gray-100 w-full border border-gray-500 rounded-md py-2 px-3 bg-gray-700 placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400"
+                  placeholder="Enter your e-mail"
                 />
               </div>
               {/* <!-- Password Input --> */}
