@@ -8,19 +8,19 @@ const Dashboard = () => {
   const [activeOrderId, setActiveOrderId] = useState("ZZABLJF2Q"); // Default active order ID
 
   return (
-    <div className="flex min-h-screen bg-gray-800">
+    <div className="flex min-h-screen bg-gray-800 w-full">
       <Sidebar />
       <div className="flex flex-col w-full">
         <Header />
-        <div className="grid grid-cols-3 h-full">
-          <div className="px-10 py-6 col-span-2">
+        <div className="flex flex-col-reverse md:grid md:grid-cols-3 h-full">
+          <div className="md:px-10 py-6 md:col-span-2">
             {/* Pass the activeOrderId and setActiveOrderId to OrderList */}
             <OrderList
               activeOrderId={activeOrderId}
               setActiveOrderId={setActiveOrderId}
             />
           </div>
-          <div className="pr-10 py-6">
+          <div className="md:pr-10 py-6">
             {/* Pass the activeOrderId to MapSection */}
             <MapSection orderId={activeOrderId} />
           </div>
