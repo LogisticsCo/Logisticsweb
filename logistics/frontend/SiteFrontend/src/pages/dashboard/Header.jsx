@@ -12,8 +12,8 @@ const Header = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center p-4 px-10 bg-gray-800">
-        <div className="relative w-80">
+      <div className="flex justify-between gap-5 flex-col-reverse md:flex-row items-center p-4 md:px-10 bg-gray-800">
+        <div className="relative md:w-80">
           <input
             type="text"
             placeholder="Search here"

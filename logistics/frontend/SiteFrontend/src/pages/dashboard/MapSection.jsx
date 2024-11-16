@@ -47,7 +47,7 @@ const MapSection = ({ orderId }) => {
   };
 
   return (
-    <div className="relative w-full h-full bg-gray-900 rounded-3xl overflow-hidden border border-gray-400/50">
+    <div className="relative w-full min-h-screen md:h-full bg-gray-900 md:rounded-3xl overflow-hidden md:border border-gray-400/50">
       {/* Map Section (Placeholder for actual map integration) */}
       <div className="absolute inset-0">
         <div className="h-full w-full relative flex justify-center items-center">
@@ -163,10 +163,10 @@ const MapSection = ({ orderId }) => {
           background:
             "linear-gradient(to bottom, rgba(31, 41, 55, 1), rgba(55, 65, 81, 0.9))",
         }}
-        className="absolute top-0 left-0 right-0 p-6 flex flex-col justify-between items-center z-30"
+        className="absolute top-0 left-0 right-0 p-4 md:p-6 flex flex-col justify-between items-center z-30"
       >
-        <div className="flex justify-between items-center w-full">
-          <div className="text-xs 2xl:text-sm font-semibold text-white">
+        <div className="flex flex-col md:flex-row gap-2 md:gap-0 justify-between items-center w-full">
+          <div className="md:text-xs 2xl:text-sm font-semibold text-white">
             Order ID {orderId}
             <span className="text-green-400">({activeOrder.status})</span>
           </div>

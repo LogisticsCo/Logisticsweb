@@ -11,7 +11,7 @@ const OrderCard = ({ orderId, status, times, image, isActive, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`rounded-lg p-4 flex justify-between items-center mb-4 cursor-pointer transition-opacity duration-300 ease-in-out ${
+      className={`rounded-lg p-4 flex flex-wrap gap-5 md:gap-0 justify-between items-center mb-4 cursor-pointer transition-opacity duration-300 ease-in-out ${
         isActive ? "bg-blue-800 border-2 border-blue-500" : "bg-gray-900"
       } group-hover:opacity-70 hover:!opacity-100`} // Smooth transition
     >
@@ -96,7 +96,7 @@ const OrderList = ({ activeOrderId, setActiveOrderId }) => {
       : orders.filter((order) => order.status === selectedFilter);
 
   return (
-    <div className="bg-gray-700/50 p-6 rounded-3xl w-full h-full mx-auto border border-gray-700">
+    <div className="bg-gray-700/50 p-4 md:p-6 md:rounded-3xl w-full h-full mx-auto border border-gray-700">
       <div className="flex justify-between">
         <div className="text-white font-semibold text-xl mb-4">
           Filter by Partners
