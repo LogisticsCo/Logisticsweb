@@ -20,8 +20,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loading animation
-    setError(""); // Clear previous error messages
+    setLoading(true); 
+    setError(""); 
     try {
       const response = await fetch(
         "https://cklogisticsco.onrender.com/backend/login/",
@@ -41,7 +41,7 @@ const Login = () => {
         const { access, refresh } = JSON.parse(responseBody);
         localStorage.setItem("accessToken", access);
         localStorage.setItem("refreshToken", refresh);
-        navigate("/dashboard"); // Navigate to the dashboard
+        navigate("/dashboard"); 
       } else {
         let errorMessage = "Error logging in";
         if (contentType && contentType.includes("application/json")) {
@@ -54,7 +54,7 @@ const Login = () => {
       console.error("Fetch Error:", err);
       setError("Error logging in");
     } finally {
-      setLoading(false); // Stop loading animation
+      setLoading(false); 
     }
   };
 

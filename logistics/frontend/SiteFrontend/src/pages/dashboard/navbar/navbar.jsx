@@ -1,4 +1,13 @@
 function Navbar() {
+  const handleSignOut = () => {
+    localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('username');
+  localStorage.removeItem('email');
+
+  
+  window.location.href = '/';
+  }
   return (
     <nav>
       <div class="flex flex-wrap items-center mx-auto">
@@ -59,12 +68,9 @@ function Navbar() {
                 </a>
               </li>
               <li>
-                <a
-                  href="#"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                >
+              <button onClick={handleSignOut} className="block w-full text-left px-4 py-2 text-sm text-white">
                   Sign out
-                </a>
+                </button>
               </li>
             </ul>
           </div>
