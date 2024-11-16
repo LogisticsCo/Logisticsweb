@@ -1,16 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
-
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -19,13 +10,6 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -110,7 +94,7 @@ const Login = () => {
             <form onSubmit={handleSubmit}>
               {/* Username Input */}
               <div className="mb-4">
-                <label htmlFor="username" className="block text-gray-400 mb-2">
+                <label htmlFor="username" className="block text-gray-400 mb-4">
                   Username
                 </label>
                 <input
@@ -126,7 +110,7 @@ const Login = () => {
               </div>
               {/* Password Input */}
               <div className="mb-4">
-                <label htmlFor="password" className="block text-gray-400 mb-2">
+                <label htmlFor="password" className="block text-gray-400 mb-4">
                   Password
                 </label>
                 <input
