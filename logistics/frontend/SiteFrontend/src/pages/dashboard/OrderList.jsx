@@ -47,16 +47,27 @@ const OrderCard = ({ orderId, truckPlate, origin, destination, checkpoints, orde
   );
 };
 
+
+
 const OrderList = ({ activeOrderId, setActiveOrderId }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch order data from the backend API
+    const access = localStorage.getItem("refreshToken");
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("https://your-backend-api.com/orders"); // Replace with actual API endpoint
-        setOrders(response.data); // Assuming response.data is an array of orders
+        // Assuming you already have a method to get the token (maybe from localStorage or state)
+        const token = localStorage.getItem('access'); // Replace with your token retrieval logic
+
+        // Send the token in the Authorization header
+        const response = await axios.get("https://cklogisticsco.onrender.com/backend/token/refresh/", {
+          headers: {
+            Authorization: `Bearer ${access}`,
+          },
+        });
+
+        setOrders(response.data); // Assuming response.data contains your orders
         setLoading(false);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -66,6 +77,8 @@ const OrderList = ({ activeOrderId, setActiveOrderId }) => {
 
     fetchOrders();
   }, []);
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="bg-gray-700/50 p-4 md:p-6 md:rounded-3xl w-full h-full mx-auto border border-gray-700">
