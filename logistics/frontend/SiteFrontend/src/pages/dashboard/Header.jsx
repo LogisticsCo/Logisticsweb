@@ -1,13 +1,97 @@
 import React, { useState } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
+import axios from "axios"; // Assuming you use axios for API requests
 
 const Header = () => {
-  // State to manage modal visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    truckPlate: "",
+    origin: "",
+    destination: "",
+    checkpoints: [],
+    status: "Checking", // Default status
+  });
 
   // Function to handle modal opening and closing
   const handleModalToggle = () => {
     setIsModalOpen(!isModalOpen);
+  };
+
+  // Handle input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Handle adding checkpoint
+  const handleAddCheckpoint = () => {
+    setFormData({
+      ...formData,
+      checkpoints: [...formData.checkpoints, ""],
+    });
+  };
+
+  // Handle removing checkpoint
+  const handleRemoveCheckpoint = (index) => {
+    const newCheckpoints = [...formData.checkpoints];
+    newCheckpoints.splice(index, 1);
+    setFormData({
+      ...formData,
+      checkpoints: newCheckpoints,
+    });
+  };
+
+  // Handle checkpoint change
+  const handleCheckpointChange = (e, index) => {
+    const { value } = e.target;
+    const newCheckpoints = [...formData.checkpoints];
+    newCheckpoints[index] = value;
+    setFormData({
+      ...formData,
+      checkpoints: newCheckpoints,
+    });
+  };
+
+  // Generate random tracking number with 3 letters and 3 numbers
+  const generateTrackingNumber = () => {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    let trackingNumber = "";
+    for (let i = 0; i < 3; i++) {
+      trackingNumber += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    for (let i = 0; i < 3; i++) {
+      trackingNumber += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return trackingNumber;
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const trackingNumber = generateTrackingNumber();
+
+    const dataToSend = {
+      ...formData,
+      trackingNumber,  // Add the tracking number to the data sent to the backend
+    };
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("https://your-backend-api.com/trucks", dataToSend);
+      console.log("Truck data saved:", response.data);
+      setLoading(false);
+      handleModalToggle(); // Close the modal after successful submission
+    } catch (error) {
+      console.error("Error saving truck data:", error);
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,36 +127,88 @@ const Header = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-lg">
           <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-500/50">
-            <h2 className="text-2xl font-semibold mb-4 text-white">
-              Add New Truck
-            </h2>
-            <form>
-              {/* Truck Name Input */}
+            <h2 className="text-2xl font-semibold mb-4 text-white">Add New Truck</h2>
+            <form onSubmit={handleSubmit}>
+              {/* Truck Plate Input */}
               <div className="mb-4">
-                <label htmlFor="truckName" className="block text-gray-400 mb-2">
-                  Truck Name
+                <label htmlFor="truckPlate" className="block text-gray-400 mb-2">
+                  Truck Plate
                 </label>
                 <input
                   type="text"
-                  id="truckName"
-                  name="truckName"
+                  id="truckPlate"
+                  name="truckPlate"
                   className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                  placeholder="Enter truck name"
+                  placeholder="Enter truck plate"
+                  value={formData.truckPlate}
+                  onChange={handleChange}
                 />
               </div>
-              {/* Truck Capacity Input */}
+
+              {/* Origin Input */}
               <div className="mb-4">
-                <label htmlFor="capacity" className="block text-gray-400 mb-2">
-                  Truck Capacity
+                <label htmlFor="origin" className="block text-gray-400 mb-2">
+                  Origin
                 </label>
                 <input
-                  type="number"
-                  id="capacity"
-                  name="capacity"
+                  type="text"
+                  id="origin"
+                  name="origin"
                   className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                  placeholder="Enter capacity (in tons)"
+                  placeholder="Enter origin"
+                  value={formData.origin}
+                  onChange={handleChange}
                 />
               </div>
+
+              {/* Destination Input */}
+              <div className="mb-4">
+                <label htmlFor="destination" className="block text-gray-400 mb-2">
+                  Destination
+                </label>
+                <input
+                  type="text"
+                  id="destination"
+                  name="destination"
+                  className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                  placeholder="Enter destination"
+                  value={formData.destination}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Checkpoints */}
+              <div className="mb-4">
+                <label htmlFor="checkpoints" className="block text-gray-400 mb-2">
+                  Checkpoints
+                </label>
+                {formData.checkpoints.map((checkpoint, index) => (
+                  <div key={index} className="flex items-center gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={checkpoint}
+                      onChange={(e) => handleCheckpointChange(e, index)}
+                      className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                      placeholder={`Checkpoint ${index + 1}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCheckpoint(index)}
+                      className="text-red-500"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleAddCheckpoint}
+                  className="bg-green-500 text-white rounded-md px-4 py-2"
+                >
+                  Add Checkpoint
+                </button>
+              </div>
+
               {/* Submit Button */}
               <div className="flex justify-end">
                 <button
@@ -85,8 +221,13 @@ const Header = () => {
                 <button
                   type="submit"
                   className="bg-blue-500 text-white rounded-md px-4 py-2"
+                  disabled={loading}
                 >
-                  Save
+                  {loading ? (
+                    <span className="animate-spin">Loading...</span>
+                  ) : (
+                    "Save"
+                  )}
                 </button>
               </div>
             </form>
