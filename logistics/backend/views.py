@@ -20,6 +20,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 
 
+
 @api_view(["POST"])
 def refresh_access_token(request):
     
@@ -40,10 +41,15 @@ def refresh_access_token(request):
     except TokenError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 class TruckCreateView(APIView):
+    def get(self, request, *args, **kwargs):
+        trucks = Truck.objects.all()  # Get all trucks
+        serializer = TruckSerializer(trucks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def post(self, request, *args, **kwargs):
         serializer = TruckSerializer(data=request.data)
         if serializer.is_valid():
-            truck = serializer.save()
+            serializer.save()  # This will call the 'create' method in the serializer
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
