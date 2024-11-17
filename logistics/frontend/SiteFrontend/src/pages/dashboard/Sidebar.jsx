@@ -21,6 +21,13 @@ const Sidebar = () => {
     { id: "messages", icon: <FaComment />, tooltip: "Messages" },
     { id: "inventory", icon: <FaBox />, tooltip: "Inventory" },
   ];
+  const handleSignOut = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('username');
+    localStorage.removeItem('email');
+    window.location.href = '/'; // Redirect to home or login page
+  }
 
   return (
     <div className="bg-gray-900 min-h-screen w-16 flex flex-col items-center py-4 space-y-4">
@@ -63,7 +70,7 @@ const Sidebar = () => {
 
       {/* Logout Button */}
       <div
-        onClick={() => setActiveItem("logout")}
+        onClick={handleSignOut}
         className={`flex items-center justify-center w-10 h-10 cursor-pointer rounded-md 
           ${
             activeItem === "logout"
