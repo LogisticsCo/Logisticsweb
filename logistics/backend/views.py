@@ -22,6 +22,7 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def refresh_access_token(request):
     
     try:
