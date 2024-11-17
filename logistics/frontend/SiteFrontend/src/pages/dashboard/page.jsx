@@ -6,16 +6,22 @@ import MapSection from "./MapSection";
 
 const Dashboard = () => {
   const [activeOrderId, setActiveOrderId] = useState("ZZABLJF2Q"); // Default active order ID
+  const [orders, setOrders] = useState([]); // State to hold orders
+
+  const addOrder = (newOrder) => {
+    setOrders((prevOrders) => [...prevOrders, newOrder]); // Add new order to the list
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-800 w-full">
       <Sidebar />
       <div className="flex flex-col w-full">
-        <Header />
+        <Header addOrder={addOrder} /> {/* Pass the addOrder function to Header */}
         <div className="flex flex-col-reverse md:grid md:grid-cols-3 h-full">
           <div className="md:px-10 py-6 md:col-span-2">
             {/* Pass the activeOrderId and setActiveOrderId to OrderList */}
             <OrderList
+              orders={orders} // Pass the orders array to OrderList
               activeOrderId={activeOrderId}
               setActiveOrderId={setActiveOrderId}
             />
