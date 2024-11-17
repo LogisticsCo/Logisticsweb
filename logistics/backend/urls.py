@@ -8,4 +8,5 @@ urlpatterns = [
     path('trucks/', TruckCreateView.as_view(), name='truck-create'),
     path("token/refresh/", refresh_access_token, name="token_refresh"),
     
+    
 ]
