@@ -1,17 +1,20 @@
 import React, { useState } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
-import axios from "axios"; // Assuming you use axios for API requests
+import axios from "axios"; 
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    truckPlate: "",
+    truck_plate: "",
     origin: "",
     destination: "",
     checkpoints: [],
-    status: "Checking", // Default status
+    status: "Checking", 
   });
+
+  const navigate = useNavigate();
 
   // Function to handle modal opening and closing
   const handleModalToggle = () => {
@@ -69,30 +72,98 @@ const Header = () => {
     }
     return trackingNumber;
   };
+  const refreshAccessToken = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      console.log(refreshToken);
+  
+      if (!refreshToken) throw new Error("Refresh token is missing");
+  
+      const response = await axios.post(
+        "https://cklogisticsco.onrender.com/backend/token/refresh/",
+        { refresh: refreshToken },
+        { headers: { "Content-Type": "application/json" } }
+      );
+  
+      const { access } = response.data;
+      localStorage.setItem("accessToken", access); // Update accessToken
+      return access;
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      return null;
+    }
+  };
+  
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const trackingNumber = generateTrackingNumber();
-
+  
     const dataToSend = {
       ...formData,
-      trackingNumber,  // Add the tracking number to the data sent to the backend
+      tracking_number: trackingNumber,
     };
-
+  
+    console.log("Data to send:", dataToSend);
+  
     setLoading(true);
-
+  
     try {
-      const response = await axios.post("https://your-backend-api.com/trucks", dataToSend);
+      let accessToken = localStorage.getItem("accessToken");
+  
+      let response = await axios.post(
+        "https://cklogisticsco.onrender.com/backend/trucks/",
+        dataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
       console.log("Truck data saved:", response.data);
       setLoading(false);
       handleModalToggle(); // Close the modal after successful submission
     } catch (error) {
-      console.error("Error saving truck data:", error);
+      if (error.response?.data?.code === "token_not_valid") {
+        console.error("Token expired, refreshing...");
+        const newAccessToken = await refreshAccessToken();
+  
+        if (newAccessToken) {
+          try {
+            const response = await axios.post(
+              "https://cklogisticsco.onrender.com/backend/trucks/",
+              dataToSend,
+              {
+                headers: {
+                  Authorization: `Bearer ${newAccessToken}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+  
+            console.log("Truck data saved:", response.data);
+            setLoading(false);
+            handleModalToggle(); // Close the modal after successful submission
+            return;
+          } catch (retryError) {
+            console.error("Error after refreshing token:", retryError);
+          }
+        } else {
+          console.error("Failed to refresh token. Redirecting to login.");
+          localStorage.clear();
+          navigate("/login");
+        }
+      } else {
+        console.error("Error saving truck data:", error);
+      }
+  
       setLoading(false);
     }
   };
+  
 
   return (
     <>
@@ -131,16 +202,16 @@ const Header = () => {
             <form onSubmit={handleSubmit}>
               {/* Truck Plate Input */}
               <div className="mb-4">
-                <label htmlFor="truckPlate" className="block text-gray-400 mb-2">
+                <label htmlFor="truck_plate" className="block text-gray-400 mb-2">
                   Truck Plate
                 </label>
                 <input
                   type="text"
-                  id="truckPlate"
-                  name="truckPlate"
+                  id="truck_plate"
+                  name="truck_plate"
                   className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                   placeholder="Enter truck plate"
-                  value={formData.truckPlate}
+                  value={formData.truck_plate}
                   onChange={handleChange}
                 />
               </div>
