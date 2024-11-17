@@ -16,7 +16,29 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import status
 from .models import Truck
 from .serializers import TruckSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 
+
+@api_view(["POST"])
+def refresh_access_token(request):
+    
+    try:
+        # Extract refresh token from the request body
+        refresh_token = request.data.get("refresh")
+
+        if not refresh_token:
+            return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        refresh = RefreshToken(refresh_token)
+        access_token = str(refresh.access_token)
+
+        return Response({"access": access_token}, status=status.HTTP_200_OK)
+    except InvalidToken:
+        return Response({"error": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+    except TokenError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 class TruckCreateView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = TruckSerializer(data=request.data)
