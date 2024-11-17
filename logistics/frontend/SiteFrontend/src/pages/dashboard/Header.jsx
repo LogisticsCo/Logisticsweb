@@ -1,67 +1,97 @@
 import React, { useState } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
+import axios from "axios"; // Assuming you use axios for API requests
 
-const Header = ({ addOrder }) => {
+const Header = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [truckDetails, setTruckDetails] = useState({
-    truckName: "",
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
     truckPlate: "",
     origin: "",
     destination: "",
     checkpoints: [],
-    capacity: "",
+    status: "Checking", // Default status
   });
-
-  const [newCheckpoint, setNewCheckpoint] = useState(""); // State for new checkpoint input
 
   // Function to handle modal opening and closing
   const handleModalToggle = () => {
     setIsModalOpen(!isModalOpen);
   };
 
+  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setTruckDetails((prevDetails) => ({
-      ...prevDetails,
+    setFormData({
+      ...formData,
       [name]: value,
-    }));
+    });
   };
 
-  const handleCheckpointChange = (e) => {
-    setNewCheckpoint(e.target.value); // Update checkpoint input
-  };
-
+  // Handle adding checkpoint
   const handleAddCheckpoint = () => {
-    if (newCheckpoint.trim() !== "") {
-      setTruckDetails((prevDetails) => ({
-        ...prevDetails,
-        checkpoints: [...prevDetails.checkpoints, newCheckpoint],
-      }));
-      setNewCheckpoint(""); // Clear the input after adding
-    }
+    setFormData({
+      ...formData,
+      checkpoints: [...formData.checkpoints, ""],
+    });
   };
 
+  // Handle removing checkpoint
   const handleRemoveCheckpoint = (index) => {
-    const updatedCheckpoints = truckDetails.checkpoints.filter(
-      (checkpoint, idx) => idx !== index
-    );
-    setTruckDetails((prevDetails) => ({
-      ...prevDetails,
-      checkpoints: updatedCheckpoints,
-    }));
+    const newCheckpoints = [...formData.checkpoints];
+    newCheckpoints.splice(index, 1);
+    setFormData({
+      ...formData,
+      checkpoints: newCheckpoints,
+    });
   };
 
-  const handleSubmit = (e) => {
+  // Handle checkpoint change
+  const handleCheckpointChange = (e, index) => {
+    const { value } = e.target;
+    const newCheckpoints = [...formData.checkpoints];
+    newCheckpoints[index] = value;
+    setFormData({
+      ...formData,
+      checkpoints: newCheckpoints,
+    });
+  };
+
+  // Generate random tracking number with 3 letters and 3 numbers
+  const generateTrackingNumber = () => {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    let trackingNumber = "";
+    for (let i = 0; i < 3; i++) {
+      trackingNumber += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    for (let i = 0; i < 3; i++) {
+      trackingNumber += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return trackingNumber;
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newOrder = {
-      ...truckDetails,
-      orderId: Math.random().toString(36).substring(7), // Generate a random order ID
-      status: "Checking",
-      times: { checking: "00:00", inTransit: "", outForDelivery: "" },
-      image: "/truck1.png", 
+
+    const trackingNumber = generateTrackingNumber();
+
+    const dataToSend = {
+      ...formData,
+      trackingNumber,  // Add the tracking number to the data sent to the backend
     };
-    addOrder(newOrder);  // Call addOrder to pass the new order to Dashboard
-    setIsModalOpen(false);  // Close the modal after saving
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("https://your-backend-api.com/trucks", dataToSend);
+      console.log("Truck data saved:", response.data);
+      setLoading(false);
+      handleModalToggle(); // Close the modal after successful submission
+    } catch (error) {
+      console.error("Error saving truck data:", error);
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,22 +129,6 @@ const Header = ({ addOrder }) => {
           <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-500/50">
             <h2 className="text-2xl font-semibold mb-4 text-white">Add New Truck</h2>
             <form onSubmit={handleSubmit}>
-              {/* Truck Name Input */}
-              <div className="mb-4">
-                <label htmlFor="truckName" className="block text-gray-400 mb-2">
-                  Truck Name
-                </label>
-                <input
-                  type="text"
-                  id="truckName"
-                  name="truckName"
-                  value={truckDetails.truckName}
-                  onChange={handleChange}
-                  className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                  placeholder="Enter truck name"
-                />
-              </div>
-
               {/* Truck Plate Input */}
               <div className="mb-4">
                 <label htmlFor="truckPlate" className="block text-gray-400 mb-2">
@@ -124,10 +138,10 @@ const Header = ({ addOrder }) => {
                   type="text"
                   id="truckPlate"
                   name="truckPlate"
-                  value={truckDetails.truckPlate}
-                  onChange={handleChange}
                   className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                   placeholder="Enter truck plate"
+                  value={formData.truckPlate}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -140,10 +154,10 @@ const Header = ({ addOrder }) => {
                   type="text"
                   id="origin"
                   name="origin"
-                  value={truckDetails.origin}
-                  onChange={handleChange}
                   className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                   placeholder="Enter origin"
+                  value={formData.origin}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -156,79 +170,64 @@ const Header = ({ addOrder }) => {
                   type="text"
                   id="destination"
                   name="destination"
-                  value={truckDetails.destination}
-                  onChange={handleChange}
                   className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                   placeholder="Enter destination"
+                  value={formData.destination}
+                  onChange={handleChange}
                 />
               </div>
 
-              {/* Checkpoints Input */}
+              {/* Checkpoints */}
               <div className="mb-4">
                 <label htmlFor="checkpoints" className="block text-gray-400 mb-2">
                   Checkpoints
                 </label>
-                <div className="flex flex-col">
-                  {truckDetails.checkpoints.map((checkpoint, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <span className="text-white">{checkpoint}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCheckpoint(index)}
-                        className="bg-red-500 text-white rounded-md px-2 py-1 ml-2"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="text"
-                    value={newCheckpoint}
-                    onChange={handleCheckpointChange}
-                    className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                    placeholder="Enter checkpoint"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddCheckpoint}
-                    className="bg-blue-500 text-white rounded-md px-4 py-2 ml-2"
-                  >
-                    Add
-                  </button>
-                </div>
+                {formData.checkpoints.map((checkpoint, index) => (
+                  <div key={index} className="flex items-center gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={checkpoint}
+                      onChange={(e) => handleCheckpointChange(e, index)}
+                      className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                      placeholder={`Checkpoint ${index + 1}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCheckpoint(index)}
+                      className="text-red-500"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleAddCheckpoint}
+                  className="bg-green-500 text-white rounded-md px-4 py-2"
+                >
+                  Add Checkpoint
+                </button>
               </div>
 
-              {/* Capacity Input */}
-              <div className="mb-4">
-                <label htmlFor="capacity" className="block text-gray-400 mb-2">
-                  Capacity
-                </label>
-                <input
-                  type="text"
-                  id="capacity"
-                  name="capacity"
-                  value={truckDetails.capacity}
-                  onChange={handleChange}
-                  className="w-full border border-gray-600 bg-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-                  placeholder="Enter capacity"
-                />
-              </div>
-
-              <div className="flex justify-end gap-4">
+              {/* Submit Button */}
+              <div className="flex justify-end">
                 <button
                   type="button"
                   onClick={handleModalToggle}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-md"
+                  className="bg-red-500 text-white rounded-md px-4 py-2 mr-2"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                  className="bg-blue-500 text-white rounded-md px-4 py-2"
+                  disabled={loading}
                 >
-                  Add Order
+                  {loading ? (
+                    <span className="animate-spin">Loading...</span>
+                  ) : (
+                    "Save"
+                  )}
                 </button>
               </div>
             </form>

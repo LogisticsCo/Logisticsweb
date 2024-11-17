@@ -14,7 +14,18 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from rest_framework import status
+from .models import Truck
+from .serializers import TruckSerializer
 
+class TruckCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = TruckSerializer(data=request.data)
+        if serializer.is_valid():
+            truck = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
