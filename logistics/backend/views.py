@@ -34,7 +34,7 @@ MAPBOX_ACCESS_TOKEN = os.environ.get('MAPBOX_ACCESS_TOKEN')
 def refresh_access_token(request):
     
     try:
-        # Extract refresh token from the request body
+        
         refresh_token = request.data.get("refresh")
 
         if not refresh_token:
