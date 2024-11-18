@@ -18,7 +18,15 @@ from .models import Truck
 from .serializers import TruckSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+import requests
+from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
+from .models import Location, Order
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+MAPBOX_ACCESS_TOKEN = os.environ.get('MAPBOX_ACCESS_TOKEN') 
 
 
 @api_view(["POST"])
@@ -130,3 +138,90 @@ def login(request):
     except Exception as e:
         return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+@csrf_exempt
+@permission_classes([AllowAny])
+def create_order(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            tracking_number = data.get("tracking_number")
+            origin_name = data.get("origin")
+            destination_name = data.get("destination")
+            checkpoints_names = data.get("checkpoints", [])
+
+            if not (tracking_number and origin_name and destination_name):
+                return JsonResponse({"error": "Missing required fields"}, status=400)
+
+            
+            def fetch_coordinates(place_name):
+                url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{place_name}.json"
+                params = {
+                    "access_token": MAPBOX_ACCESS_TOKEN,
+                    "limit": 1,
+                }
+                response = requests.get(url, params=params)
+                response_data = response.json()
+
+                if response_data["features"]:
+                    feature = response_data["features"][0]
+                    return {
+                        "name": feature["place_name"],
+                        "longitude": feature["geometry"]["coordinates"][0],
+                        "latitude": feature["geometry"]["coordinates"][1],
+                    }
+                else:
+                    return None
+
+            
+            origin_coords = fetch_coordinates(origin_name)
+            destination_coords = fetch_coordinates(destination_name)
+            checkpoint_coords = [fetch_coordinates(name) for name in checkpoints_names]
+
+            if not (origin_coords and destination_coords):
+                return JsonResponse({"error": "Failed to geocode origin or destination"}, status=400)
+
+            
+            with transaction.atomic():
+                
+                origin = Location.objects.create(
+                    name=origin_coords["name"],
+                    latitude=origin_coords["latitude"],
+                    longitude=origin_coords["longitude"],
+                )
+                destination = Location.objects.create(
+                    name=destination_coords["name"],
+                    latitude=destination_coords["latitude"],
+                    longitude=destination_coords["longitude"],
+                )
+
+                
+                checkpoints = []
+                for checkpoint in checkpoint_coords:
+                    if checkpoint:
+                        checkpoints.append(Location.objects.create(
+                            name=checkpoint["name"],
+                            latitude=checkpoint["latitude"],
+                            longitude=checkpoint["longitude"],
+                            is_checkpoint=True,
+                        ))
+
+                
+                order = Order.objects.create(
+                    tracking_number=tracking_number,
+                    origin=origin,
+                    destination=destination,
+                )
+                order.checkpoints.set(checkpoints)
+
+            return JsonResponse({
+                "message": "Order created successfully",
+                "order_id": order.id,
+                "tracking_number": order.tracking_number,
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
