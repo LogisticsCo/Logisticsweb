@@ -43,14 +43,14 @@ def refresh_access_token(request):
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 class TruckCreateView(APIView):
     def get(self, request, *args, **kwargs):
-        trucks = Truck.objects.all()  # Get all trucks
+        trucks = Truck.objects.all()  
         serializer = TruckSerializer(trucks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         serializer = TruckSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()  # This will call the 'create' method in the serializer
+            serializer.save()  
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
