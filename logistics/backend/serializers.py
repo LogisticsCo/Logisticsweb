@@ -8,7 +8,7 @@ class CheckpointSerializer(serializers.ModelSerializer):
         fields = ['location']
 
 class TruckSerializer(serializers.ModelSerializer):
-    checkpoints = CheckpointSerializer(many=True, required=False)  
+    checkpoints = serializers.ListField(child=serializers.CharField(max_length=255) 
 
     class Meta:
         model = Truck
