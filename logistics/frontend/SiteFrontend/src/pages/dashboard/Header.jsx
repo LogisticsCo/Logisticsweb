@@ -113,7 +113,7 @@ const Header = () => {
       let accessToken = localStorage.getItem("accessToken");
 
       let response = await axios.post(
-        "https://cklogisticsco.onrender.com/backend/trucks/",
+        "https://cklogisticsco.onrender.com/backend/create-order/",
         dataToSend,
         {
           headers: {
@@ -134,7 +134,7 @@ const Header = () => {
         if (newAccessToken) {
           try {
             const response = await axios.post(
-              "https://cklogisticsco.onrender.com/backend/trucks/",
+              "https://cklogisticsco.onrender.com/backend/create-order/",
               dataToSend,
               {
                 headers: {

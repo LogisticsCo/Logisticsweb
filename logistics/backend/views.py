@@ -178,6 +178,8 @@ def create_order(request):
             # Parse incoming JSON data
             data = json.loads(request.body)
             tracking_number = data.get("tracking_number")
+            truck_plate = data.get("truck_plate")
+            status=data.get("status")
             origin_name = data.get("origin")
             destination_name = data.get("destination")
             checkpoints_names = data.get("checkpoints", [])
@@ -244,6 +246,8 @@ def create_order(request):
                 # Create the order and associate with the locations
                 order = Order.objects.create(
                     tracking_number=tracking_number,
+                    truck_plate=truck_plate,
+                    status=status,
                     origin=origin,
                     destination=destination,
                 )
