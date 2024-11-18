@@ -224,7 +224,7 @@ def create_order(request):
             def fetch_coordinates(place_name):
                 url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{place_name}.json"
                 params = {
-                    "access_token": MAPBOX_ACCESS_TOKEN,
+                    "access_token": os.environ.get('MAPBOX_ACCESS_TOKEN'),
                     "limit": 1,
                 }
                 try:
