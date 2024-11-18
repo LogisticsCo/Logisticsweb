@@ -89,8 +89,39 @@ def register(request):
         return Response({"detail": "User created successfully!"}, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@permission_classes([AllowAny])
+def get_order_coordinates(request, order_id):
+    try:
+        order = Order.objects.get(tracking_number=order_id)
+        
+        order_details = {
+            "order_id": order.id,
+            "tracking_number": order.tracking_number,
+            "origin": {
+                "name": order.origin.name,
+                "latitude": order.origin.latitude,
+                "longitude": order.origin.longitude,
+            },
+            "destination": {
+                "name": order.destination.name,
+                "latitude": order.destination.latitude,
+                "longitude": order.destination.longitude,
+            },
+            "checkpoints": [
+                {
+                    "name": checkpoint.name,
+                    "latitude": checkpoint.latitude,
+                    "longitude": checkpoint.longitude,
+                }
+                for checkpoint in order.checkpoints.all()
+            ]
+        }
 
-
+        return JsonResponse(order_details)
+    
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "Order not found"}, status=404)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -139,52 +170,55 @@ def login(request):
         return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 @csrf_exempt
 @permission_classes([AllowAny])
 def create_order(request):
     if request.method == "POST":
         try:
+            # Parse incoming JSON data
             data = json.loads(request.body)
             tracking_number = data.get("tracking_number")
             origin_name = data.get("origin")
             destination_name = data.get("destination")
             checkpoints_names = data.get("checkpoints", [])
 
+            # Validate required fields
             if not (tracking_number and origin_name and destination_name):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
-            
+            # Function to fetch coordinates from Mapbox
             def fetch_coordinates(place_name):
                 url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{place_name}.json"
                 params = {
                     "access_token": MAPBOX_ACCESS_TOKEN,
                     "limit": 1,
                 }
-                response = requests.get(url, params=params)
-                response_data = response.json()
-
-                if response_data["features"]:
-                    feature = response_data["features"][0]
-                    return {
-                        "name": feature["place_name"],
-                        "longitude": feature["geometry"]["coordinates"][0],
-                        "latitude": feature["geometry"]["coordinates"][1],
-                    }
-                else:
+                try:
+                    response = requests.get(url, params=params)
+                    response_data = response.json()
+                    if response_data["features"]:
+                        feature = response_data["features"][0]
+                        return {
+                            "name": feature["place_name"],
+                            "longitude": feature["geometry"]["coordinates"][0],
+                            "latitude": feature["geometry"]["coordinates"][1],
+                        }
+                    else:
+                        return None
+                except Exception as e:
                     return None
 
-            
+            # Fetch coordinates for origin, destination, and checkpoints
             origin_coords = fetch_coordinates(origin_name)
             destination_coords = fetch_coordinates(destination_name)
             checkpoint_coords = [fetch_coordinates(name) for name in checkpoints_names]
 
+            # If origin or destination coordinates are missing, return error
             if not (origin_coords and destination_coords):
                 return JsonResponse({"error": "Failed to geocode origin or destination"}, status=400)
 
-            
+            # Save locations in the database inside a transaction block
             with transaction.atomic():
-                
                 origin = Location.objects.create(
                     name=origin_coords["name"],
                     latitude=origin_coords["latitude"],
@@ -196,18 +230,18 @@ def create_order(request):
                     longitude=destination_coords["longitude"],
                 )
 
-                
                 checkpoints = []
                 for checkpoint in checkpoint_coords:
                     if checkpoint:
-                        checkpoints.append(Location.objects.create(
+                        checkpoint_location = Location.objects.create(
                             name=checkpoint["name"],
                             latitude=checkpoint["latitude"],
                             longitude=checkpoint["longitude"],
                             is_checkpoint=True,
-                        ))
+                        )
+                        checkpoints.append(checkpoint_location)
 
-                
+                # Create the order and associate with the locations
                 order = Order.objects.create(
                     tracking_number=tracking_number,
                     origin=origin,
@@ -215,13 +249,19 @@ def create_order(request):
                 )
                 order.checkpoints.set(checkpoints)
 
+            # Return the success response with order details
             return JsonResponse({
                 "message": "Order created successfully",
                 "order_id": order.id,
                 "tracking_number": order.tracking_number,
+                "origin": origin_coords,
+                "destination": destination_coords,
+                "checkpoints": checkpoint_coords,
             })
 
         except Exception as e:
+            # Handle any unexpected errors
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
+
