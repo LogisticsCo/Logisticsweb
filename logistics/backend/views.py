@@ -98,6 +98,8 @@ def get_order_coordinates(request, order_id):
         order_details = {
             "order_id": order.id,
             "tracking_number": order.tracking_number,
+            "truck_plate": order.truck_plate,
+            "status": order.status,
             "origin": {
                 "name": order.origin.name,
                 "latitude": order.origin.latitude,
