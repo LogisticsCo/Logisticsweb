@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
-import axios from "axios"; 
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -11,7 +11,7 @@ const Header = () => {
     origin: "",
     destination: "",
     checkpoints: [],
-    status: "Checking", 
+    status: "Checking",
   });
 
   const navigate = useNavigate();
@@ -65,26 +65,29 @@ const Header = () => {
     const numbers = "0123456789";
     let trackingNumber = "";
     for (let i = 0; i < 3; i++) {
-      trackingNumber += letters.charAt(Math.floor(Math.random() * letters.length));
+      trackingNumber += letters.charAt(
+        Math.floor(Math.random() * letters.length)
+      );
     }
     for (let i = 0; i < 3; i++) {
-      trackingNumber += numbers.charAt(Math.floor(Math.random() * numbers.length));
+      trackingNumber += numbers.charAt(
+        Math.floor(Math.random() * numbers.length)
+      );
     }
     return trackingNumber;
   };
   const refreshAccessToken = async () => {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
-      console.log(refreshToken);
-  
+
       if (!refreshToken) throw new Error("Refresh token is missing");
-  
+
       const response = await axios.post(
         "https://cklogisticsco.onrender.com/backend/token/refresh/",
         { refresh: refreshToken },
         { headers: { "Content-Type": "application/json" } }
       );
-  
+
       const { access } = response.data;
       localStorage.setItem("accessToken", access); // Update accessToken
       return access;
@@ -93,25 +96,22 @@ const Header = () => {
       return null;
     }
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const trackingNumber = generateTrackingNumber();
-  
+
     const dataToSend = {
       ...formData,
       tracking_number: trackingNumber,
     };
-  
-    console.log("Data to send:", dataToSend);
-  
+    console.log(dataToSend);
     setLoading(true);
-  
+
     try {
       let accessToken = localStorage.getItem("accessToken");
-  
+
       let response = await axios.post(
         "https://cklogisticsco.onrender.com/backend/trucks/",
         dataToSend,
@@ -122,15 +122,14 @@ const Header = () => {
           },
         }
       );
-  
-      console.log("Truck data saved:", response.data);
+
       setLoading(false);
       handleModalToggle(); // Close the modal after successful submission
     } catch (error) {
       if (error.response?.data?.code === "token_not_valid") {
         console.error("Token expired, refreshing...");
         const newAccessToken = await refreshAccessToken();
-  
+
         if (newAccessToken) {
           try {
             const response = await axios.post(
@@ -143,8 +142,7 @@ const Header = () => {
                 },
               }
             );
-  
-            console.log("Truck data saved:", response.data);
+
             setLoading(false);
             handleModalToggle(); // Close the modal after successful submission
             return;
@@ -159,11 +157,10 @@ const Header = () => {
       } else {
         console.error("Error saving truck data:", error);
       }
-  
+
       setLoading(false);
     }
   };
-  
 
   return (
     <>
@@ -198,11 +195,16 @@ const Header = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-lg">
           <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-500/50">
-            <h2 className="text-2xl font-semibold mb-4 text-white">Add New Truck</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-white">
+              Add New Truck
+            </h2>
             <form onSubmit={handleSubmit}>
               {/* Truck Plate Input */}
               <div className="mb-4">
-                <label htmlFor="truck_plate" className="block text-gray-400 mb-2">
+                <label
+                  htmlFor="truck_plate"
+                  className="block text-gray-400 mb-2"
+                >
                   Truck Plate
                 </label>
                 <input
@@ -234,7 +236,10 @@ const Header = () => {
 
               {/* Destination Input */}
               <div className="mb-4">
-                <label htmlFor="destination" className="block text-gray-400 mb-2">
+                <label
+                  htmlFor="destination"
+                  className="block text-gray-400 mb-2"
+                >
                   Destination
                 </label>
                 <input
@@ -250,7 +255,10 @@ const Header = () => {
 
               {/* Checkpoints */}
               <div className="mb-4">
-                <label htmlFor="checkpoints" className="block text-gray-400 mb-2">
+                <label
+                  htmlFor="checkpoints"
+                  className="block text-gray-400 mb-2"
+                >
                   Checkpoints
                 </label>
                 {formData.checkpoints.map((checkpoint, index) => (
