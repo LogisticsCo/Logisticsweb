@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import DropdownButton from "./dropdown";
+import DropdownButton from "./dropdown"; // Assuming this component exists for a dropdown
 
 const OrderCard = ({
   orderId,
@@ -12,9 +12,10 @@ const OrderCard = ({
   isActive,
   onClick,
 }) => {
+  // Check if checkpoints are available and format them into a string
   const checkpointLocations = checkpoints && checkpoints.length > 0
-  ? checkpoints.join(", ") // Simply join the array elements into a string
-  : "No checkpoints available";
+    ? checkpoints.map((checkpoint) => `${checkpoint.name} (${checkpoint.latitude}, ${checkpoint.longitude})`).join(", ")
+    : "No checkpoints available";
 
   return (
     <div
@@ -72,24 +73,22 @@ const OrderCard = ({
 const OrderList = ({ activeOrderId, setActiveOrderId }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const refreshAccessToken = async () => {
     try {
-      const refreshToken = localStorage.getItem("refreshToken"); // Get the refresh token from storage
-
+      const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) {
         throw new Error("No refresh token found");
       }
-
       const response = await axios.post(
         "https://cklogisticsco.onrender.com/backend/token/refresh/",
-        { refresh: refreshToken }, // Send the refresh token to get a new access token
+        { refresh: refreshToken },
         { headers: { "Content-Type": "application/json" } }
       );
-
-      const { access } = response.data; // Assuming the new access token is returned in "access"
-      localStorage.setItem("accessToken", access); // Save the new access token
-      return access; // Return the new access token
+      const { access } = response.data;
+      localStorage.setItem("accessToken", access);
+      return access;
     } catch (error) {
       console.error("Error refreshing token:", error);
       throw new Error("Unable to refresh token");
@@ -118,25 +117,25 @@ const OrderList = ({ activeOrderId, setActiveOrderId }) => {
     } catch (error) {
       if (error.response && error.response.status === 401) {
         try {
-          const newAccessToken = await refreshAccessToken(); // Get a new access token using the refresh token
-
+          const newAccessToken = await refreshAccessToken();
           const response = await axios.get(
-            "https://cklogisticsco.onrender.com/backend/token/refresh/",
+            "https://cklogisticsco.onrender.com/backend/trucks/",
             {
               headers: {
                 Authorization: `Bearer ${newAccessToken}`,
               },
             }
           );
-
-          setOrders(response.data); 
+          setOrders(response.data);
           setLoading(false);
         } catch (refreshError) {
           console.error("Error refreshing token:", refreshError);
+          setError("Unable to refresh token.");
           setLoading(false);
         }
       } else {
         console.error("Error fetching orders:", error);
+        setError("Unable to fetch orders.");
         setLoading(false);
       }
     }
@@ -147,6 +146,7 @@ const OrderList = ({ activeOrderId, setActiveOrderId }) => {
   }, []);
 
   if (loading) return <p>Loading...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="bg-gray-700/50 p-4 md:p-6 md:rounded-3xl w-full h-full mx-auto border border-gray-700">
@@ -158,22 +158,20 @@ const OrderList = ({ activeOrderId, setActiveOrderId }) => {
 
       {/* Order Cards */}
       <div>
-        {loading ? (
-          <div className="text-white">Loading orders...</div>
-        ) : orders.length === 0 ? (
+        {orders.length === 0 ? (
           <div className="text-white">No orders available</div>
         ) : (
           orders.map((order) => (
             <OrderCard
               key={order.tracking_number}
-              orderId={order.tracking_number} 
-              truckPlate={order.truck_plate} 
-              origin={order.origin} 
-              destination={order.destination} 
-              checkpoints={order.checkpoints} 
-              orderStatus={order.status} 
-              isActive={order.tracking_number === activeOrderId} 
-              onClick={() => setActiveOrderId(order.tracking_number)} 
+              orderId={order.tracking_number}
+              truckPlate={order.truck_plate}
+              origin={order.origin.name} // Assuming origin is an object
+              destination={order.destination.name} // Assuming destination is an object
+              checkpoints={order.checkpoints} // Assuming checkpoints is an array of objects
+              orderStatus={order.status}
+              isActive={order.tracking_number === activeOrderId}
+              onClick={() => setActiveOrderId(order.tracking_number)}
             />
           ))
         )}
