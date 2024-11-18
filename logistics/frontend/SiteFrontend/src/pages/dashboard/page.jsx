@@ -12,15 +12,15 @@ const Dashboard = () => {
       <Sidebar />
       <div className="flex flex-col w-full">
         <Header />
-        <div className="flex flex-col-reverse md:grid md:grid-cols-3 h-full">
-          <div className="md:px-10 py-6 md:col-span-2">
+        <div className="flex flex-col md:grid md:grid-cols-12 h-full">
+          <div className="md:px-6 py-6 md:col-span-4 lg:col-span-3">
             {/* Pass the activeOrderId and setActiveOrderId to OrderList */}
             <OrderList
               activeOrderId={activeOrderId}
               setActiveOrderId={setActiveOrderId}
             />
           </div>
-          <div className="md:pr-10 py-6">
+          <div className="md:px-6 py-6 md:col-span-8 lg:col-span-9">
             {/* Pass the activeOrderId to MapSection */}
             <MapSection orderId={activeOrderId} />
           </div>
