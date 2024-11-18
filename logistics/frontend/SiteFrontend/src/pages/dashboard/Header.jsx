@@ -89,7 +89,7 @@ const Header = () => {
       );
 
       const { access } = response.data;
-      localStorage.setItem("accessToken", access); 
+      localStorage.setItem("accessToken", access); // Update accessToken
       return access;
     } catch (error) {
       console.error("Error refreshing token:", error);
@@ -105,10 +105,8 @@ const Header = () => {
     const dataToSend = {
       ...formData,
       tracking_number: trackingNumber,
-      checkpoints: formData.checkpoints, 
     };
-
-    console.log("Data to Send:", dataToSend);
+    console.log(dataToSend);
     setLoading(true);
 
     try {
@@ -125,9 +123,8 @@ const Header = () => {
         }
       );
 
-      console.log("Response:", response.data);
       setLoading(false);
-      handleModalToggle(); 
+      handleModalToggle(); // Close the modal after successful submission
     } catch (error) {
       if (error.response?.data?.code === "token_not_valid") {
         console.error("Token expired, refreshing...");
@@ -146,9 +143,8 @@ const Header = () => {
               }
             );
 
-            console.log("Response after token refresh:", response.data);
             setLoading(false);
-            handleModalToggle(); 
+            handleModalToggle(); // Close the modal after successful submission
             return;
           } catch (retryError) {
             console.error("Error after refreshing token:", retryError);
@@ -159,13 +155,12 @@ const Header = () => {
           navigate("/login");
         }
       } else {
-        console.error("Error saving truck data:", error.response?.data || error);
+        console.error("Error saving truck data:", error);
       }
 
       setLoading(false);
     }
   };
-
 
   return (
     <>

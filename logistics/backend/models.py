@@ -11,19 +11,18 @@ class Coordinates(models.Model):
 
 
 class Truck(models.Model):
-    truck_plate = models.CharField(max_length=255)
+    truck_plate = models.CharField(max_length=20)
     origin = models.CharField(max_length=255)
     destination = models.CharField(max_length=255)
-    status = models.CharField(max_length=255)
-    tracking_number = models.CharField(max_length=255)
-
+    status = models.CharField(max_length=50, default="Checking")
+    tracking_number = models.CharField(max_length=6, unique=True)
+    
     def __str__(self):
-        return self.truck_plate
-
+        return f"Truck {self.truck_plate} - {self.status}"
 
 class Checkpoint(models.Model):
     truck = models.ForeignKey(Truck, related_name='checkpoints', on_delete=models.CASCADE)
     location = models.CharField(max_length=255)
-
+    
     def __str__(self):
-        return self.location
+        return f"Checkpoint {self.location} for {self.truck.truck_plate}"
