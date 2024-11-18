@@ -2,13 +2,21 @@ from rest_framework import serializers
 from .models import Truck
 
 class TruckSerializer(serializers.ModelSerializer):
-    checkpoints = serializers.ListField(
-        child=serializers.CharField(max_length=255), required=False, allow_null=True
-    )
+    # Define the checkpoints field as a list of strings
+    checkpoints = serializers.SerializerMethodField()
 
     class Meta:
         model = Truck
         fields = ['id', 'truck_plate', 'origin', 'destination', 'status', 'tracking_number', 'checkpoints']
+
+    def get_checkpoints(self, obj):
+        
+        checkpoints = []
+        for i in range(1, 6):  
+            checkpoint = getattr(obj, f'checkpoint_{i}', None)
+            if checkpoint:
+                checkpoints.append(checkpoint)
+        return checkpoints
 
     def validate_checkpoints(self, value):
         # Ensure the list has at most 5 elements
@@ -20,7 +28,7 @@ class TruckSerializer(serializers.ModelSerializer):
         checkpoints_data = validated_data.pop('checkpoints', [])
         truck = Truck.objects.create(**validated_data)
 
-        # Assign checkpoints to separate fields if available
+        
         for i, checkpoint in enumerate(checkpoints_data):
             setattr(truck, f'checkpoint_{i+1}', checkpoint)
         truck.save()

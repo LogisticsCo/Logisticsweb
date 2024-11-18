@@ -12,6 +12,11 @@ const OrderCard = ({
   isActive,
   onClick,
 }) => {
+  // Extract the checkpoint locations if available
+  const checkpointLocations = checkpoints && checkpoints.length > 0
+    ? checkpoints.map(checkpoint => checkpoint.location).join(", ")
+    : "No checkpoints available";
+
   return (
     <div
       onClick={onClick}
@@ -21,7 +26,7 @@ const OrderCard = ({
     >
       <div className="flex flex-col space-y-2">
         <div className="text-white text-sm font-semibold">
-          Order ID: {orderId} 
+          Order ID: {orderId}
         </div>
         <div className="space-y-1 text-gray-400 text-xs">
           <div>
@@ -42,7 +47,7 @@ const OrderCard = ({
           </div>
           <div>
             <span className="inline-block w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
-            Checkpoints: {checkpoints && checkpoints.length > 0 ? checkpoints.join(", ") : "No checkpoints available"}
+            Checkpoints: {checkpointLocations}
           </div>
           {/* Displaying Order Status */}
           <div>
@@ -56,13 +61,11 @@ const OrderCard = ({
               {orderStatus}
             </span>
           </div>
-          
         </div>
-        
       </div>
       <div>
-            <img src="/truck1.png" alt="Vehicle" className="h-20 object-contain" />
-          </div>
+        <img src="/truck1.png" alt="Vehicle" className="h-20 object-contain" />
+      </div>
     </div>
   );
 };
