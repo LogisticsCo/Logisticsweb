@@ -38,6 +38,8 @@ class Location(models.Model):
 
 class Order(models.Model):
     tracking_number = models.CharField(max_length=100, unique=True)  # Order ID
+    truck_plate = models.CharField(max_length=200)
+    status = models.CharField(max_length=200)
     origin = models.ForeignKey(Location, related_name="order_origin", on_delete=models.CASCADE)
     destination = models.ForeignKey(Location, related_name="order_destination", on_delete=models.CASCADE)
     checkpoints = models.ManyToManyField(Location, related_name="order_checkpoints", blank=True)
