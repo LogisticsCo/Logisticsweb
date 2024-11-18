@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse,JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
 import json
@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -26,21 +26,20 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-MAPBOX_ACCESS_TOKEN = os.environ.get('MAPBOX_ACCESS_TOKEN') 
+MAPBOX_ACCESS_TOKEN = os.environ.get('MAPBOX_ACCESS_TOKEN')
 
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def refresh_access_token(request):
-    
+
     try:
-        
+
         refresh_token = request.data.get("refresh")
 
         if not refresh_token:
             return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        
         refresh = RefreshToken(refresh_token)
         access_token = str(refresh.access_token)
 
@@ -49,76 +48,80 @@ def refresh_access_token(request):
         return Response({"error": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
     except TokenError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@permission_classes([AllowAny])
 class TruckCreateView(APIView):
-    try:
-        
-        orders = Order.objects.all()
+    def get(self, request, *args, **kwargs):  # Add the 'get' method
+        try:
+           
+            orders = Order.objects.all()
 
-        order_details = [
-            {
-                "order_id": order.id,
-                "tracking_number": order.tracking_number,
-                "truck_plate": order.truck_plate,
-                "status": order.status,
-                "origin": {
-                    "name": order.origin.name,
-                    "latitude": order.origin.latitude,
-                    "longitude": order.origin.longitude,
-                },
-                "destination": {
-                    "name": order.destination.name,
-                    "latitude": order.destination.latitude,
-                    "longitude": order.destination.longitude,
-                },
-                "checkpoints": [
-                    {
-                        "name": checkpoint.name,
-                        "latitude": checkpoint.latitude,
-                        "longitude": checkpoint.longitude,
-                    }
-                    for checkpoint in order.checkpoints.all()
-                ]
-            }
-            for order in orders
-        ]
+           
+            order_details = [
+                {
+                    "order_id": order.id,
+                    "tracking_number": order.tracking_number,
+                    "truck_plate": order.truck_plate,
+                    "status": order.status,
+                    "origin": {
+                        "name": order.origin.name,
+                        "latitude": order.origin.latitude,
+                        "longitude": order.origin.longitude,
+                    },
+                    "destination": {
+                        "name": order.destination.name,
+                        "latitude": order.destination.latitude,
+                        "longitude": order.destination.longitude,
+                    },
+                    "checkpoints": [
+                        {
+                            "name": checkpoint.name,
+                            "latitude": checkpoint.latitude,
+                            "longitude": checkpoint.longitude,
+                        }
+                        for checkpoint in order.checkpoints.all()
+                    ]
+                }
+                for order in orders
+            ]
 
-        return JsonResponse(order_details, safe=False)
+            # Return the order details as a JSON response
+            return JsonResponse(order_details, safe=False)
 
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-    
-    
+        except Exception as e:
+            # Return error message in case of an exception
+            return JsonResponse({"error": str(e)}, status=500)
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
-    
+
     try:
         data = request.data
         username = data['username']
-        
+
         password = data['password']
         print(data)
-        
+
         if User.objects.filter(username=username).exists():
             return Response({"detail": "User already exists. Log in"}, status=status.HTTP_400_BAD_REQUEST)
 
-        
-
         user = User.objects.create(
             username=username,
-            
+
             password=make_password(password),
         )
         user.save()
         return Response({"detail": "User created successfully!"}, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 @permission_classes([AllowAny])
 def get_order_coordinates(request, order_id):
     try:
         order = Order.objects.get(tracking_number=order_id)
-        
+
         order_details = {
             "order_id": order.id,
             "tracking_number": order.tracking_number,
@@ -145,37 +148,40 @@ def get_order_coordinates(request, order_id):
         }
 
         return JsonResponse(order_details)
-    
+
     except Order.DoesNotExist:
         return JsonResponse({"error": "Order not found"}, status=404)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
     try:
         if isinstance(request.data, dict) and '_content' not in request.data:
-                data = request.data
-                print("Parsed as JSON:", data)
+            data = request.data
+            print("Parsed as JSON:", data)
         else:
             # Convert QueryDict to a dictionary
             data = dict(request.data)
             print("QueryDict Data:", data)
-            
+
             # Extract JSON content from '_content' key
-            data_json = data.get('_content', '')  # Assuming '_content' exists in QueryDict
+            # Assuming '_content' exists in QueryDict
+            data_json = data.get('_content', '')
             print(data_json)
-            data_json = data_json[0].replace("\r\n", "")  # Clean up new lines if any
-            data = json.loads(data_json)  # Convert JSON string to a Python dictionary
+            data_json = data_json[0].replace(
+                "\r\n", "")  # Clean up new lines if any
+            # Convert JSON string to a Python dictionary
+            data = json.loads(data_json)
             print("Extracted Data:", data)
 
-        
         print(data)
         username = data.get('username')
         password = data.get('password')
-        
+
         # Authenticate user
         user = authenticate(username=username, password=password)
-        
+
         if user is not None:
             # Generate refresh and access tokens
             refresh = RefreshToken.for_user(user)
@@ -186,12 +192,12 @@ def login(request):
                 'access': str(access),
                 'user': {
                     'username': user.username,
-                    
+
                 }
             }, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-    
+
     except Exception as e:
         return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -201,11 +207,11 @@ def login(request):
 def create_order(request):
     if request.method == "POST":
         try:
-            # Parse incoming JSON data
+            
             data = json.loads(request.body)
             tracking_number = data.get("tracking_number")
             truck_plate = data.get("truck_plate")
-            status=data.get("status")
+            status = data.get("status")
             origin_name = data.get("origin")
             destination_name = data.get("destination")
             checkpoints_names = data.get("checkpoints", [])
@@ -239,7 +245,8 @@ def create_order(request):
             # Fetch coordinates for origin, destination, and checkpoints
             origin_coords = fetch_coordinates(origin_name)
             destination_coords = fetch_coordinates(destination_name)
-            checkpoint_coords = [fetch_coordinates(name) for name in checkpoints_names]
+            checkpoint_coords = [fetch_coordinates(
+                name) for name in checkpoints_names]
 
             # If origin or destination coordinates are missing, return error
             if not (origin_coords and destination_coords):
@@ -294,4 +301,3 @@ def create_order(request):
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
-
