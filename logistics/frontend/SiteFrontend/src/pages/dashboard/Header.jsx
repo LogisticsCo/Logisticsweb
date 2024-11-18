@@ -124,7 +124,8 @@ const Header = () => {
       );
 
       setLoading(false);
-      handleModalToggle(); // Close the modal after successful submission
+      handleModalToggle(); 
+      window.location.reload();
     } catch (error) {
       if (error.response?.data?.code === "token_not_valid") {
         console.error("Token expired, refreshing...");
