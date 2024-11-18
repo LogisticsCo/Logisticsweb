@@ -8,7 +8,7 @@ class CheckpointSerializer(serializers.ModelSerializer):
         fields = ['location']
 
 class TruckSerializer(serializers.ModelSerializer):
-    checkpoints = serializers.ListField(child=serializers.CharField(max_length=255) )
+    checkpoints = serializers.ListField(child=serializers.CharField(max_length=255))
 
     class Meta:
         model = Truck
@@ -16,12 +16,14 @@ class TruckSerializer(serializers.ModelSerializer):
     
   
     def create(self, validated_data):
-        checkpoints_data = validated_data.pop('checkpoints', [])
-        truck = Truck.objects.create(**validated_data)  
+    checkpoints_data = validated_data.pop('checkpoints', [])  
+    truck = Truck.objects.create(**validated_data)  
+    
+    
+    for location in checkpoints_data:
+        Checkpoint.objects.create(truck=truck, location=location)
         
-        for checkpoint_data in checkpoints_data:
-            Checkpoint.objects.create(truck=truck, **checkpoint_data)
-        return truck
+    return truck
 
    
     def update(self, instance, validated_data):
