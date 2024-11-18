@@ -50,18 +50,42 @@ def refresh_access_token(request):
     except TokenError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 class TruckCreateView(APIView):
-    def get(self, request, *args, **kwargs):
-        trucks = Truck.objects.all()  
-        serializer = TruckSerializer(trucks, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    try:
+        
+        orders = Order.objects.all()
 
-    def post(self, request, *args, **kwargs):
-        serializer = TruckSerializer(data=request.data)
-        print(serializer)
-        if serializer.is_valid():
-            serializer.save()  
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        order_details = [
+            {
+                "order_id": order.id,
+                "tracking_number": order.tracking_number,
+                "truck_plate": order.truck_plate,
+                "status": order.status,
+                "origin": {
+                    "name": order.origin.name,
+                    "latitude": order.origin.latitude,
+                    "longitude": order.origin.longitude,
+                },
+                "destination": {
+                    "name": order.destination.name,
+                    "latitude": order.destination.latitude,
+                    "longitude": order.destination.longitude,
+                },
+                "checkpoints": [
+                    {
+                        "name": checkpoint.name,
+                        "latitude": checkpoint.latitude,
+                        "longitude": checkpoint.longitude,
+                    }
+                    for checkpoint in order.checkpoints.all()
+                ]
+            }
+            for order in orders
+        ]
+
+        return JsonResponse(order_details, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
     
     
 @api_view(['POST'])
