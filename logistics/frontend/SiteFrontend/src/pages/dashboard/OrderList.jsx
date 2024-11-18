@@ -12,10 +12,9 @@ const OrderCard = ({
   isActive,
   onClick,
 }) => {
-  // Extract the checkpoint locations if available
   const checkpointLocations = checkpoints && checkpoints.length > 0
-    ? checkpoints.map(checkpoint => checkpoint.location).join(", ")
-    : "No checkpoints available";
+  ? checkpoints.join(", ") // Simply join the array elements into a string
+  : "No checkpoints available";
 
   return (
     <div
