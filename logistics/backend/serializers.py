@@ -16,14 +16,14 @@ class TruckSerializer(serializers.ModelSerializer):
     
   
     def create(self, validated_data):
-    checkpoints_data = validated_data.pop('checkpoints', [])  
-    truck = Truck.objects.create(**validated_data)  
-    
-    
-    for location in checkpoints_data:
-        Checkpoint.objects.create(truck=truck, location=location)
+        checkpoints_data = validated_data.pop('checkpoints', [])  
+        truck = Truck.objects.create(**validated_data)  
         
-    return truck
+        
+        for location in checkpoints_data:
+            Checkpoint.objects.create(truck=truck, location=location)
+            
+        return truck
 
    
     def update(self, instance, validated_data):
