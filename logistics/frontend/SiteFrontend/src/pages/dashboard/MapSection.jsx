@@ -9,43 +9,43 @@ const MapSection = ({ orderId }) => {
   const mapContainer = React.useRef(null);
   const map = React.useRef(null);
   const [markers, setMarkers] = useState([]);
-  const [route, setRoute] = useState(null); // To store route data
+  const [route, setRoute] = useState(null);
 
   useEffect(() => {
-    // Initialize the map only once
+    
     if (!map.current && mapContainer.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/streets-v11",
-        center: [37.012128, -1.100903], // Default center (Juja, Kenya)
+        center: [37.012128, -1.100903], 
         zoom: 10,
       });
     }
   }, []);
 
   useEffect(() => {
-    // Fetch the order data when orderId changes
+    
     if (orderId) {
       axios
         .get(`https://cklogisticsco.onrender.com/backend/order/${orderId}/coordinates/`)
         .then((response) => {
           const { origin, destination, checkpoints } = response.data;
 
-          // Clear previous markers
+          
           markers.forEach((marker) => marker.remove());
 
           const newMarkers = [];
-          const locations = [origin, ...checkpoints, destination]; // Ensure correct order: origin -> checkpoints -> destination
+          const locations = [origin, ...checkpoints, destination];
 
-          // Only add checkpoints if they exist
+          
           if (checkpoints.length > 0) {
-            // Add markers for origin, checkpoints, and destination
+            
             locations.forEach((location) => {
-              // Set color based on location type (origin, destination, or checkpoint)
+              
               const markerColor = location === origin ? "green" : location === destination ? "red" : "blue";
 
               const marker = new mapboxgl.Marker({
-                color: markerColor, // Origin in green, destination in red, others in blue
+                color: markerColor, 
               })
                 .setLngLat([location.longitude, location.latitude])
                 .setPopup(
@@ -56,7 +56,7 @@ const MapSection = ({ orderId }) => {
               newMarkers.push(marker);
             });
           } else {
-            // Only add origin and destination markers if there are no checkpoints
+            
             const markerColor = "green";
             new mapboxgl.Marker({ color: markerColor })
               .setLngLat([origin.longitude, origin.latitude])
@@ -71,17 +71,17 @@ const MapSection = ({ orderId }) => {
 
           setMarkers(newMarkers);
 
-          // Adjust map bounds to fit all markers
+          
           const bounds = new mapboxgl.LngLatBounds();
           locations.forEach((location) =>
             bounds.extend([location.longitude, location.latitude])
           );
           map.current.fitBounds(bounds, { padding: 50 });
 
-          // Request route from the Directions API, in the order of origin -> checkpoints -> destination
+          
           const waypoints = locations.map(location => [location.longitude, location.latitude]);
           
-          // If no checkpoints exist, only calculate the route from origin to destination
+          
           const routeUrl = checkpoints.length > 0
             ? `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints.join(';')}?geometries=geojson&access_token=${mapboxgl.accessToken}`
             : `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
