@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@turf/turf": "^7.1.0",
     "axios": "^1.7.7",
     "flowbite": "^2.5.2",
     "flowbite-react": "^0.10.2",
@@ -31,6 +32,6 @@
     "globals": "^15.9.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
-    "vite": "^5.4.9"
+    "vite": "^5.4.11"
   }
 }

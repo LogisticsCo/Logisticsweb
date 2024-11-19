@@ -1,167 +1,124 @@
-import { useState, useEffect, useRef } from "react";
-import { FaPhone, FaComment } from "react-icons/fa";
-import axios from "axios"; // For API requests
-import mapboxgl from "mapbox-gl"; // Import Mapbox GL JS
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
-// Set the Mapbox access token
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const MapSection = ({ orderId }) => {
-  const [orderData, setOrderData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Initialize map reference
-  const mapContainer = useRef(null); // Reference for the map container
+  const mapContainer = React.useRef(null);
+  const map = React.useRef(null);
+  const [markers, setMarkers] = useState([]);
+  const [route, setRoute] = useState(null); // To store route data
 
   useEffect(() => {
-    // Function to fetch order data
-    const fetchOrderData = async () => {
-      try {
-        const response = await axios.get(`https://cklogisticsco.onrender.com/backend/order/${orderId}/coordinates/`); 
-        setOrderData(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to fetch order data.");
-        setLoading(false);
-      }
-    };
-
-    fetchOrderData();
-  }, [orderId]); // Re-fetch data if orderId changes
-
-  useEffect(() => {
-    if (orderData && orderData.route) {
-      // Mapbox map initialization when order data is available
-      const { route } = orderData;
-      const { origin, destination, checkpoints } = route;
-
-      const map = new mapboxgl.Map({
-        container: mapContainer.current, // Map container reference
-        style: "mapbox://styles/mapbox/streets-v11", // Map style
-        center: [origin.lng, origin.lat], // Start center based on the origin
-        zoom: 10, // Adjust zoom level
-      });
-
-      // Add a marker for the origin
-      new mapboxgl.Marker({ color: "green" })
-        .setLngLat([origin.lng, origin.lat])
-        .setPopup(new mapboxgl.Popup().setHTML(`<h3>Origin</h3><p>${origin.name}</p>`))
-        .addTo(map);
-
-      // Add markers for checkpoints
-      checkpoints.forEach((checkpoint) => {
-        new mapboxgl.Marker({ color: "orange" })
-          .setLngLat([checkpoint.lng, checkpoint.lat])
-          .setPopup(new mapboxgl.Popup().setHTML(`<h3>Checkpoint</h3><p>${checkpoint.name}</p>`))
-          .addTo(map);
-      });
-
-      // Add a marker for the destination
-      new mapboxgl.Marker({ color: "red" })
-        .setLngLat([destination.lng, destination.lat])
-        .setPopup(new mapboxgl.Popup().setHTML(`<h3>Destination</h3><p>${destination.name}</p>`))
-        .addTo(map);
-
-      // Create a polyline (red line) to connect the origin, checkpoints, and destination
-      const routeCoordinates = [
-        [origin.lng, origin.lat],
-        ...checkpoints.map((checkpoint) => [checkpoint.lng, checkpoint.lat]),
-        [destination.lng, destination.lat],
-      ];
-
-      // Add a red line (polyline) connecting the points
-      map.addSource("route", {
-        type: "geojson",
-        data: {
-          type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates: routeCoordinates,
-          },
-        },
-      });
-
-      map.addLayer({
-        id: "route-line",
-        type: "line",
-        source: "route",
-        paint: {
-          "line-color": "red",
-          "line-width": 3,
-        },
+    // Initialize the map only once
+    if (!map.current && mapContainer.current) {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/streets-v11",
+        center: [37.012128, -1.100903], // Default center (Juja, Kenya)
+        zoom: 10,
       });
     }
-  }, [orderData]);
+  }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    // Fetch the order data when orderId changes
+    if (orderId) {
+      axios
+        .get(`https://cklogisticsco.onrender.com/backend/order/${orderId}/coordinates/`)
+        .then((response) => {
+          const { origin, destination, checkpoints } = response.data;
 
-  if (error) {
-    return <div>{error}</div>;
-  }
+          // Clear previous markers
+          markers.forEach((marker) => marker.remove());
 
-  // Destructure order data
-  const { status, driver, image, route } = orderData;
+          const newMarkers = [];
+          const locations = [origin, ...checkpoints, destination]; // Ensure correct order: origin -> checkpoints -> destination
 
-  return (
-    <div className="relative w-full min-h-screen md:h-full bg-gray-900 md:rounded-3xl overflow-hidden md:border border-gray-400/50">
-      {/* Map Section (Mapbox integration) */}
-      <div className="absolute inset-0">
-        <div
-          className="h-full w-full"
-          ref={mapContainer} // Attach the map to the container
-          style={{ height: "100%" }}
-        ></div>
-      </div>
+          // Only add checkpoints if they exist
+          if (checkpoints.length > 0) {
+            // Add markers for origin, checkpoints, and destination
+            locations.forEach((location) => {
+              // Set color based on location type (origin, destination, or checkpoint)
+              const markerColor = location === origin ? "green" : location === destination ? "red" : "blue";
 
-      {/* Order Details Section */}
-      <div
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(31, 41, 55, 1), rgba(55, 65, 81, 0.9))",
-        }}
-        className="absolute top-0 left-0 right-0 p-4 md:p-6 flex flex-col justify-between items-center z-30"
-      >
-        <div className="flex flex-col md:flex-row gap-2 md:gap-0 justify-between items-center w-full">
-          <div className="md:text-xs 2xl:text-sm font-semibold text-white">
-            Order ID {orderId}
-            <span className="text-green-400">({status})</span>
-          </div>
-          <div className="flex space-x-2">
-            <button className="bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 flex items-center text-xs 2xl:text-sm text-white">
-              <FaPhone className="mr-2" /> Call Driver
-            </button>
-            <button className="bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 flex items-center text-xs 2xl:text-sm text-white">
-              <FaComment className="mr-2" /> Chat with Driver
-            </button>
-          </div>
-        </div>
-      </div>
+              const marker = new mapboxgl.Marker({
+                color: markerColor, // Origin in green, destination in red, others in blue
+              })
+                .setLngLat([location.longitude, location.latitude])
+                .setPopup(
+                  new mapboxgl.Popup({ offset: 25 }).setText(location.name)
+                )
+                .addTo(map.current);
 
-      {/* Bottom Section: Truck Capacity and Info */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 z-30">
-        <div className="mb-6 bg-gray-800 p-4 rounded-lg flex items-center">
-          <img
-            src={image || "https://via.placeholder.com/100"} // Use order's image
-            alt="Truck"
-            className="w-fit h-16 mr-4"
-          />
-          <div className="w-full">
-            <div className="flex bg-gray-300 rounded-full h-4">
-              <div
-                className="bg-blue-500 rounded-full"
-                style={{ width: "60%" }} // Adjust this dynamically based on real data
-              ></div>
-            </div>
+              newMarkers.push(marker);
+            });
+          } else {
+            // Only add origin and destination markers if there are no checkpoints
+            const markerColor = "green";
+            new mapboxgl.Marker({ color: markerColor })
+              .setLngLat([origin.longitude, origin.latitude])
+              .setPopup(new mapboxgl.Popup({ offset: 25 }).setText(origin.name))
+              .addTo(map.current);
+              
+            new mapboxgl.Marker({ color: "red" })
+              .setLngLat([destination.longitude, destination.latitude])
+              .setPopup(new mapboxgl.Popup({ offset: 25 }).setText(destination.name))
+              .addTo(map.current);
+          }
 
-            <div className="text-sm mt-2 text-gray-300">60% Full</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+          setMarkers(newMarkers);
+
+          // Adjust map bounds to fit all markers
+          const bounds = new mapboxgl.LngLatBounds();
+          locations.forEach((location) =>
+            bounds.extend([location.longitude, location.latitude])
+          );
+          map.current.fitBounds(bounds, { padding: 50 });
+
+          // Request route from the Directions API, in the order of origin -> checkpoints -> destination
+          const waypoints = locations.map(location => [location.longitude, location.latitude]);
+          
+          // If no checkpoints exist, only calculate the route from origin to destination
+          const routeUrl = checkpoints.length > 0
+            ? `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints.join(';')}?geometries=geojson&access_token=${mapboxgl.accessToken}`
+            : `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+
+          axios
+            .get(routeUrl)
+            .then((routeResponse) => {
+              const routeData = routeResponse.data.routes[0].geometry;
+              setRoute(routeData);
+
+              // Add the route as a line on the map
+              if (routeData) {
+                map.current.addLayer({
+                  id: "route",
+                  type: "line",
+                  source: {
+                    type: "geojson",
+                    data: {
+                      type: "Feature",
+                      properties: {},
+                      geometry: routeData,
+                    },
+                  },
+                  paint: {
+                    "line-color": "#ff0000",
+                    "line-width": 5,
+                  },
+                });
+              }
+            })
+            .catch((error) => console.error("Error fetching route:", error));
+        })
+        .catch((error) => console.error("Failed to fetch order data:", error));
+    }
+  }, [orderId, markers]);
+
+  return <div ref={mapContainer} style={{ width: "100%", height: "500px" }} />;
 };
 
 export default MapSection;
