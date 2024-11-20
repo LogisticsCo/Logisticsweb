@@ -328,24 +328,24 @@ class ForgotPasswordAPIView(APIView):
             user.set_password(new_password)
             user.save()
 
-            # Send email with the new password
+            
             send_mail(
                 'Password Reset',
                 f'Your new password is: {new_password}',
-                'frandelwanjawa19@gmail.com',  # Make sure this is your verified sender email
-                [email],  # Recipient email
-                fail_silently=False,  # Set to False to raise exceptions if email fails
+                'frandelwanjawa19@gmail.com',  
+                [email],  
+                fail_silently=False,  
             )
 
-            # Return success message
+            
             return Response({'message': 'A new password has been sent to your email.'}, status=200)
 
         except User.DoesNotExist:
-            # If no user with that email exists, return error
+            
             return Response({'error': 'User with this email does not exist.'}, status=404)
 
         except Exception as e:
-            # Handle any other exceptions that may occur (e.g., SMTP issues, random errors)
+            
             return Response({'error': str(e)}, status=500)
 
 @permission_classes([AllowAny])
@@ -353,31 +353,37 @@ class ForgotPasswordAPIView(APIView):
 def save_coordinates(request):
     if request.method == "POST":
         try:
-            data = json.loads(request.body) 
+            data = json.loads(request.body)
             latitude = data.get('latitude')
             longitude = data.get('longitude')
+            order_id = data.get('order_id')
 
-           
-            if latitude is None or longitude is None:
-                return JsonResponse({"error": "Both latitude and longitude are required"}, status=400)
+            if latitude is None or longitude is None or not order_id:
+                return JsonResponse({"error": "latitude, longitude, and order_id are required"}, status=400)
 
-           
-            coordinates = Coordinates(latitude=latitude, longitude=longitude)
+            coordinates = Coordinates(latitude=latitude, longitude=longitude, order_id=order_id)
             coordinates.save()
 
             return JsonResponse({"message": "Coordinates saved successfully"}, status=201)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
-    
+
     elif request.method == "GET":
-        
-        latest_coordinates = Coordinates.objects.latest('created_at') 
-        data = {
-            "latitude": latest_coordinates.latitude,
-            "longitude": latest_coordinates.longitude,
-            "created_at": latest_coordinates.created_at.isoformat()  
-        }
-        return JsonResponse(data)
+        order_id = request.GET.get('order_id')
+        if not order_id:
+            return JsonResponse({"error": "order_id is required"}, status=400)
+
+        coordinates = Coordinates.objects.filter(order_id=order_id).order_by('created_at')
+        data = [
+            {
+                "latitude": coord.latitude,
+                "longitude": coord.longitude,
+                "created_at": coord.created_at.isoformat()
+            }
+            for coord in coordinates
+        ]
+        return JsonResponse({"coordinates": data}, safe=False)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+

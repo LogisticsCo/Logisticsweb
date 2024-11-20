@@ -3,7 +3,7 @@ from django.db import models
 class Coordinates(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
-    order_id = models.CharField(max_length=255)  # Added order_id
+    order_id = models.CharField(max_length=255) 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
