@@ -306,7 +306,7 @@ def create_order(request):
         return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
-
+@permission_classes([AllowAny])
 def forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')

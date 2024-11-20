@@ -8,6 +8,11 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false); // State for Forgot Password modal
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotMessage, setForgotMessage] = useState(""); // Message for forgot password status
+  const [forgotError, setForgotError] = useState("");
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,8 +25,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); 
-    setError(""); 
+    setLoading(true);
+    setError("");
     try {
       const response = await fetch(
         "https://cklogisticsco.onrender.com/backend/login/",
@@ -41,7 +46,7 @@ const Login = () => {
         const { access, refresh } = JSON.parse(responseBody);
         localStorage.setItem("accessToken", access);
         localStorage.setItem("refreshToken", refresh);
-        navigate("/dashboard"); 
+        navigate("/dashboard");
       } else {
         let errorMessage = "Error logging in";
         if (contentType && contentType.includes("application/json")) {
@@ -54,7 +59,36 @@ const Login = () => {
       console.error("Fetch Error:", err);
       setError("Error logging in");
     } finally {
-      setLoading(false); 
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setForgotMessage("");
+    setForgotError("");
+
+    try {
+      const response = await fetch(
+        "https://cklogisticsco.onrender.com/backend/forgot-password/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: forgotEmail }),
+        }
+      );
+
+      if (response.ok) {
+        setForgotMessage("A new password has been sent to your email.");
+      } else {
+        const result = await response.json();
+        setForgotError(result.error || "Failed to reset password.");
+      }
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setForgotError("Failed to reset password.");
     }
   };
 
@@ -141,9 +175,13 @@ const Login = () => {
                 </div>
                 {/* Forgot Password Link */}
                 <div className="text-blue-400">
-                  <a href="#" className="hover:underline">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="hover:underline"
+                  >
                     Forgot Password?
-                  </a>
+                  </button>
                 </div>
               </div>
               {/* Login Button */}
@@ -166,6 +204,49 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-30">
+          <div className="bg-gray-800 p-6 rounded-lg w-1/3">
+            <h2 className="text-white text-lg font-semibold mb-4">
+              Reset Your Password
+            </h2>
+            <form onSubmit={handleForgotPasswordSubmit}>
+              <div className="mb-4">
+                <label
+                  htmlFor="forgot-email"
+                  className="block text-gray-400 mb-2"
+                >
+                  Enter your registered email
+                </label>
+                <input
+                  type="email"
+                  id="forgot-email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="text-gray-100 w-full border border-gray-500 rounded-md py-2 px-3 bg-gray-700 placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-md py-2 px-4 w-full transition duration-300 ease-in-out"
+              >
+                Submit
+              </button>
+            </form>
+            {forgotMessage && <p className="mt-4 text-green-500">{forgotMessage}</p>}
+            {forgotError && <p className="mt-4 text-red-500">{forgotError}</p>}
+            <button
+              onClick={() => setShowForgotPassword(false)}
+              className="mt-4 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-md py-2 px-4 w-full transition duration-300 ease-in-out"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
