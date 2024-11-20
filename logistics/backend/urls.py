@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import login,register,TruckCreateView,refresh_access_token,save_coordinates,create_order,get_order_coordinates,ForgotPasswordAPIView
+from .views import login,register,TruckCreateView,update_order_status,refresh_access_token,save_coordinates,create_order,get_order_coordinates,ForgotPasswordAPIView
 
 
 urlpatterns = [
@@ -11,6 +11,6 @@ urlpatterns = [
     path('order/<str:order_id>/coordinates/', get_order_coordinates, name='get_order_coordinates'),
     path('forgot-password/', ForgotPasswordAPIView.as_view(), name='forgot_password'),
     path('coordinates/', save_coordinates, name='save_coordinates'),
-    
+    path('order/<str:order_id>/status/', update_order_status, name='update_order_status'),
     
 ]
