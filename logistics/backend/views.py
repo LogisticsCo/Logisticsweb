@@ -164,29 +164,26 @@ def login(request):
             data = request.data
             print("Parsed as JSON:", data)
         else:
-            # Convert QueryDict to a dictionary
+            
             data = dict(request.data)
             print("QueryDict Data:", data)
 
-            # Extract JSON content from '_content' key
-            # Assuming '_content' exists in QueryDict
+            
             data_json = data.get('_content', '')
             print(data_json)
-            data_json = data_json[0].replace(
-                "\r\n", "")  # Clean up new lines if any
-            # Convert JSON string to a Python dictionary
+            data_json = data_json[0].replace("\r\n", "")  
             data = json.loads(data_json)
             print("Extracted Data:", data)
 
         print(data)
         username = data.get('username')
         password = data.get('password')
-
-        # Authenticate user
-        user = authenticate(username=username, password=password)
+        email = data.get('email')
+        
+        user = authenticate(username=username, password=password,email=email)
 
         if user is not None:
-            # Generate refresh and access tokens
+            
             refresh = RefreshToken.for_user(user)
             access = refresh.access_token
 
@@ -195,6 +192,7 @@ def login(request):
                 'access': str(access),
                 'user': {
                     'username': user.username,
+                    'email': user.email,
 
                 }
             }, status=status.HTTP_200_OK)
@@ -307,25 +305,32 @@ def create_order(request):
 
 
 @permission_classes([AllowAny])
-def forgot_password(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
+class ForgotPasswordAPIView(APIView):
+    permission_classes = [AllowAny]  # Allow access to anyone, even unauthenticated users
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')  # Retrieve email from request body
+
+        if not email:
+            return Response({'error': 'Email is required.'}, status=400)
+
         try:
             user = User.objects.get(email=email)
-            
+
+            # Generate a new password
             new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
             user.set_password(new_password)
             user.save()
-            
-            
+
+            # Send an email with the new password
             send_mail(
                 'Password Reset',
                 f'Your new password is: {new_password}',
-                'your_email@example.com',
+                'your_email@example.com',  # Replace with your actual email
                 [email],
                 fail_silently=False,
             )
-            return JsonResponse({'message': 'A new password has been sent to your email.'}, status=200)
+            return Response({'message': 'A new password has been sent to your email.'}, status=200)
+
         except User.DoesNotExist:
-            return JsonResponse({'error': 'User with this email does not exist.'}, status=404)
-    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+            return Response({'error': 'User with this email does not exist.'}, status=404)
