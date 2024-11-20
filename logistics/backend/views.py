@@ -21,12 +21,14 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 import requests
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
-from .models import Location, Order
+from .models import Location, Order,Coordinates
 import os
 import random
 import string
 from django.core.mail import send_mail
 from dotenv import load_dotenv
+
+
 
 load_dotenv()
 MAPBOX_ACCESS_TOKEN = os.environ.get('MAPBOX_ACCESS_TOKEN')
@@ -345,3 +347,37 @@ class ForgotPasswordAPIView(APIView):
         except Exception as e:
             # Handle any other exceptions that may occur (e.g., SMTP issues, random errors)
             return Response({'error': str(e)}, status=500)
+
+@permission_classes([AllowAny])
+@csrf_exempt
+def save_coordinates(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body) 
+            latitude = data.get('latitude')
+            longitude = data.get('longitude')
+
+           
+            if latitude is None or longitude is None:
+                return JsonResponse({"error": "Both latitude and longitude are required"}, status=400)
+
+           
+            coordinates = Coordinates(latitude=latitude, longitude=longitude)
+            coordinates.save()
+
+            return JsonResponse({"message": "Coordinates saved successfully"}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+    
+    elif request.method == "GET":
+        
+        latest_coordinates = Coordinates.objects.latest('created_at') 
+        data = {
+            "latitude": latest_coordinates.latitude,
+            "longitude": latest_coordinates.longitude,
+            "created_at": latest_coordinates.created_at.isoformat()  
+        }
+        return JsonResponse(data)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
