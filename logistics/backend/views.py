@@ -23,6 +23,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from .models import Location, Order
 import os
+import random
+import string
+from django.core.mail import send_mail
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -301,3 +304,28 @@ def create_order(request):
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+            
+            new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            user.set_password(new_password)
+            user.save()
+            
+            
+            send_mail(
+                'Password Reset',
+                f'Your new password is: {new_password}',
+                'your_email@example.com',
+                [email],
+                fail_silently=False,
+            )
+            return JsonResponse({'message': 'A new password has been sent to your email.'}, status=200)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User with this email does not exist.'}, status=404)
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
