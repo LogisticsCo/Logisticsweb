@@ -27,12 +27,33 @@ import random
 import string
 from django.core.mail import send_mail
 from dotenv import load_dotenv
+from django.shortcuts import get_object_or_404
 
 
 
 load_dotenv()
 MAPBOX_ACCESS_TOKEN = os.environ.get('MAPBOX_ACCESS_TOKEN')
 
+
+@permission_classes([AllowAny])
+def update_order_status(request, order_id):
+    if request.method == 'POST':
+        
+        new_status = request.POST.get('status')
+
+        if new_status is None:
+            return JsonResponse({'error': 'Status is required'}, status=400)
+
+        
+        order = get_object_or_404(Order, tracking_number=order_id)
+
+        
+        order.status = new_status
+        order.save()
+
+        return JsonResponse({'message': 'Order status updated successfully', 'status': order.status})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
