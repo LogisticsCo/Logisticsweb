@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import login,register,TruckCreateView,refresh_access_token,create_order,get_order_coordinates,forgot_password
+from .views import login,register,TruckCreateView,refresh_access_token,create_order,get_order_coordinates,ForgotPasswordAPIView
 
 
 urlpatterns = [
@@ -9,7 +9,7 @@ urlpatterns = [
     path("token/refresh/", refresh_access_token, name="token_refresh"),
     path('create-order/', create_order, name='create_order'),
     path('order/<str:order_id>/coordinates/', get_order_coordinates, name='get_order_coordinates'),
-    path('forgot-password/', forgot_password, name='forgot_password'),
+    path('forgot-password/', ForgotPasswordAPIView.as_view(), name='forgot_password'),
 
     
     
