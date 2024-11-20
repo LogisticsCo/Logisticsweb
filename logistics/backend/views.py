@@ -306,10 +306,8 @@ def create_order(request):
 
 @permission_classes([AllowAny])
 class ForgotPasswordAPIView(APIView):
-    permission_classes = [AllowAny]  # Allow access to anyone, even unauthenticated users
-
-    def post(self, request, *args, **kwargs):
-        email = request.data.get('email')  # Retrieve email from request body
+     def post(self, request, *args, **kwargs):
+        email = request.data.get('email')  
 
         if not email:
             return Response({'error': 'Email is required.'}, status=400)
