@@ -326,7 +326,7 @@ class ForgotPasswordAPIView(APIView):
             send_mail(
                 'Password Reset',
                 f'Your new password is: {new_password}',
-                'your_email@example.com',  # Replace with your actual email
+                'frandelwanjawa19@gmail.com',  
                 [email],
                 fail_silently=False,
             )

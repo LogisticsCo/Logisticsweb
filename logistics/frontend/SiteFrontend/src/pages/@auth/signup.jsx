@@ -22,7 +22,7 @@ function Signup() {
 
     const data = {
       username,
-
+      email,
       password,
     };
 
@@ -106,7 +106,7 @@ function Signup() {
                   E-mail
                 </label>
                 <input
-                  type="text"
+                  type="email"
                   id="email"
                   name="email"
                   value={email}
