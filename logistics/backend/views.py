@@ -34,19 +34,19 @@ from django.shortcuts import get_object_or_404
 load_dotenv()
 MAPBOX_ACCESS_TOKEN = os.environ.get('MAPBOX_ACCESS_TOKEN')
 
-
+@csrf_exempt
 @permission_classes([AllowAny])
 def update_order_status(request, order_id):
     if request.method == 'POST':
-        
-        new_status = request.POST.get('status')
-
+        data = json.loads(request.body)
+        new_status = data.get('status')
+        print(new_status)
         if new_status is None:
             return JsonResponse({'error': 'Status is required'}, status=400)
 
         
         order = get_object_or_404(Order, tracking_number=order_id)
-
+        print(order)
         
         order.status = new_status
         order.save()

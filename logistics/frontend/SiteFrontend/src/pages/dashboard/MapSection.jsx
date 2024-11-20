@@ -127,9 +127,7 @@ const MapSection = ({ orderId }) => {
 
         // Get the latest data point
         const latestCoordinates =
-          anotherMarkerResponse.data.coordinates[
-            anotherMarkerResponse.data.coordinates.length - 1
-          ];
+          anotherMarkerResponse.data.coordinates[anotherMarkerResponse.data.coordinates.length - 1];
         const { longitude, latitude } = latestCoordinates;
 
         // Create the new marker (green)
@@ -184,18 +182,10 @@ const MapSection = ({ orderId }) => {
         if (latestCoordinates) {
           setStatus("active");
 
-          // Update status in the database
+          // Update status in the database (only if coordinates exist)
           await axios.put(
             `https://cklogisticsco.onrender.com/backend/order/${orderId}/status/`,
             { status: "active" }
-          );
-        } else {
-          setStatus("checking");
-
-          // Optionally update the status in the database to "checking" if no data is available
-          await axios.put(
-            `https://cklogisticsco.onrender.com/backend/order/${orderId}/status/`,
-            { status: "checking" }
           );
         }
       } catch (error) {
