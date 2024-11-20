@@ -306,31 +306,42 @@ def create_order(request):
 
 @permission_classes([AllowAny])
 class ForgotPasswordAPIView(APIView):
-    permission_classes = [AllowAny]  # Allow access to anyone, even unauthenticated users
-
+    
     def post(self, request, *args, **kwargs):
-        email = request.data.get('email')  # Retrieve email from request body
+        # Get email from the request data
+        email = request.data.get('email')  
 
+        # If email is not provided, return error
         if not email:
             return Response({'error': 'Email is required.'}, status=400)
 
         try:
+            # Try to find the user by email
             user = User.objects.get(email=email)
 
             # Generate a new password
             new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            
+            # Set the new password for the user and save
             user.set_password(new_password)
             user.save()
 
-            # Send an email with the new password
+            # Send email with the new password
             send_mail(
                 'Password Reset',
                 f'Your new password is: {new_password}',
-                'frandelwanjawa19@gmail.com',  
-                [email],
-                fail_silently=False,
+                'frandelwanjawa19@gmail.com',  # Make sure this is your verified sender email
+                [email],  # Recipient email
+                fail_silently=False,  # Set to False to raise exceptions if email fails
             )
+
+            # Return success message
             return Response({'message': 'A new password has been sent to your email.'}, status=200)
 
         except User.DoesNotExist:
+            # If no user with that email exists, return error
             return Response({'error': 'User with this email does not exist.'}, status=404)
+
+        except Exception as e:
+            # Handle any other exceptions that may occur (e.g., SMTP issues, random errors)
+            return Response({'error': str(e)}, status=500)
