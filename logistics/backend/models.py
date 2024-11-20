@@ -3,10 +3,12 @@ from django.db import models
 class Coordinates(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
+    order_id = models.CharField(max_length=255) 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Latitude: {self.latitude}, Longitude: {self.longitude}, Created At: {self.created_at}"
+        return f"Order: {self.order_id}, Latitude: {self.latitude}, Longitude: {self.longitude}, Created At: {self.created_at}"
+
     
 
 
