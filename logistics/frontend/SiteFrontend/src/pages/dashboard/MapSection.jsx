@@ -9,10 +9,9 @@ const MapSection = ({ orderId }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [markers, setMarkers] = useState([]); // Keep track of markers
-  const [greenPathLayerId, setGreenPathLayerId] = useState(null); // Track green path layer ID
   const [status, setStatus] = useState("checking"); // Order status (checking by default)
 
-  // Initialize map only once
+  // Initialize the map only once
   useEffect(() => {
     if (!map.current && mapContainer.current) {
       map.current = new mapboxgl.Map({
@@ -30,24 +29,20 @@ const MapSection = ({ orderId }) => {
 
     const fetchData = async () => {
       try {
-        // Clear previous markers and layers
+        // Clear previous markers
         markers.forEach((marker) => marker.remove());
         setMarkers([]);
 
-        // Remove previous route layer
-        const layers = map.current.getStyle().layers;
-        layers.forEach((layer) => {
-          if (layer.id === "route") {
-            map.current.removeLayer("route");
-            map.current.removeSource("route");
-          }
-        });
+        // Remove previous route layer if it exists
+        if (map.current.getLayer("route")) {
+          map.current.removeLayer("route");
+          map.current.removeSource("route");
+        }
 
         // Remove previous green path layer if it exists
-        if (greenPathLayerId) {
-          map.current.removeLayer(greenPathLayerId);
-          map.current.removeSource(greenPathLayerId);
-          setGreenPathLayerId(null); // Clear the previous layer ID
+        if (map.current.getLayer("greenRoute")) {
+          map.current.removeLayer("greenRoute");
+          map.current.removeSource("greenRouteSource");
         }
 
         // Fetch order data
@@ -60,7 +55,6 @@ const MapSection = ({ orderId }) => {
         const locations = [origin, ...checkpoints, destination];
         const newMarkers = [];
 
-        // Add marker for each location
         locations.forEach((location) => {
           const markerColor =
             location === origin
@@ -77,7 +71,7 @@ const MapSection = ({ orderId }) => {
           newMarkers.push(marker);
         });
 
-        setMarkers(newMarkers); // Update markers state
+        setMarkers(newMarkers);
 
         // Adjust map bounds to fit all markers
         const bounds = new mapboxgl.LngLatBounds();
@@ -90,17 +84,14 @@ const MapSection = ({ orderId }) => {
         const waypoints = locations.map(
           (location) => [location.longitude, location.latitude]
         );
-        const routeUrl =
-          checkpoints.length > 0
-            ? `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints
-                .map((point) => point.join(","))
-                .join(";")}?geometries=geojson&access_token=${mapboxgl.accessToken}`
-            : `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+        const routeUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints
+          .map((point) => point.join(","))
+          .join(";")}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
 
         const routeResponse = await axios.get(routeUrl);
         const routeData = routeResponse.data.routes[0].geometry;
 
-        // Add the route as a line on the map
+        // Add the route layer if data exists
         if (routeData) {
           map.current.addLayer({
             id: "route",
@@ -120,72 +111,86 @@ const MapSection = ({ orderId }) => {
           });
         }
 
-        // Now fetch the latest coordinates from the backend
-        const url = `https://cklogisticsco.onrender.com/backend/coordinates/?order_id=${orderId}`;
-        const anotherMarkerResponse = await axios.get(url);
-        console.log(anotherMarkerResponse);
+        // Fetch live coordinates
+        const liveResponse = await axios.get(
+          `https://cklogisticsco.onrender.com/backend/coordinates/?order_id=${orderId}`
+        );
+        const liveCoordinates = liveResponse.data.coordinates.map((coord) => [
+          coord.longitude,
+          coord.latitude,
+        ]);
 
-        // Get the latest data point
+        console.log("Extracted Coordinates:", liveCoordinates);
+
+        // Latest coordinate
         const latestCoordinates =
-          anotherMarkerResponse.data.coordinates[anotherMarkerResponse.data.coordinates.length - 1];
+          liveResponse.data.coordinates[liveResponse.data.coordinates.length - 1];
         const { longitude, latitude } = latestCoordinates;
 
-        // Create the new marker (green)
-        const anotherMarker = new mapboxgl.Marker({ color: "green" })
+        // Add latest marker
+        const latestMarker = new mapboxgl.Marker({ color: "green" })
           .setLngLat([longitude, latitude])
-          .setPopup(new mapboxgl.Popup({ offset: 25 }).setText("Latest Data Point"))
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setText("Latest Data Point")
+          )
           .addTo(map.current);
+        newMarkers.push(latestMarker);
 
-        // Add the latest marker to the markers array
-        newMarkers.push(anotherMarker);
-
-        // Draw green path from origin to latest marker
+        // Update green path
         const greenPathData = {
           type: "Feature",
           geometry: {
             type: "LineString",
             coordinates: [
               [origin.longitude, origin.latitude],
-              ...locations.map((location) => [location.longitude, location.latitude]),
-              [longitude, latitude], // Add the latest data point
+              ...liveCoordinates,
+              [longitude, latitude],
             ],
           },
-          properties: {},
         };
 
-        // Add the green path layer
-        const newGreenPathLayerId = "greenRoute-" + Date.now(); // Unique layer ID
-        map.current.addLayer({
-          id: newGreenPathLayerId,
-          type: "line",
-          source: {
+        if (map.current.getSource("greenRouteSource")) {
+          map.current.getSource("greenRouteSource").setData(greenPathData);
+        } else {
+          map.current.addSource("greenRouteSource", {
             type: "geojson",
             data: greenPathData,
-          },
-          paint: {
-            "line-color": "#00ff00", // Green color
-            "line-width": 5,
-          },
-        });
+          });
 
-        setGreenPathLayerId(newGreenPathLayerId); // Set new green path layer ID
+          map.current.addLayer({
+            id: "greenRoute",
+            type: "line",
+            source: "greenRouteSource",
+            paint: {
+              "line-color": "#00ff00", // Green color
+              "line-width": 5,
+            },
+          });
+        }
 
-        // Adjust map bounds to fit all markers including new one
+        // Adjust map bounds for the latest point
         const finalBounds = new mapboxgl.LngLatBounds();
         locations.forEach((location) =>
           finalBounds.extend([location.longitude, location.latitude])
         );
-        finalBounds.extend([longitude, latitude]); // Include the latest marker
+        finalBounds.extend([longitude, latitude]);
         map.current.fitBounds(finalBounds, { padding: 50 });
 
-        // Update the status based on the latest data
-        if (latestCoordinates) {
-          setStatus("active");
-
-          // Update status in the database (only if coordinates exist)
-          await axios.put(
+        // Update status
+        if (
+          latitude === destination.latitude &&
+          longitude === destination.longitude
+        ) {
+          setStatus("completed");
+          await axios.post(
             `https://cklogisticsco.onrender.com/backend/order/${orderId}/status/`,
-            { status: "active" }
+            { status: "Completed" }
+          );
+        } else {
+          setStatus("active");
+          await axios.post(
+            `https://cklogisticsco.onrender.com/backend/order/${orderId}/status/`,
+            { status: "Active" }
           );
         }
       } catch (error) {
