@@ -9,9 +9,10 @@ const MapSection = ({ orderId }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [markers, setMarkers] = useState([]); // Keep track of markers
+  const [greenPathLayerId, setGreenPathLayerId] = useState(null); // Track green path layer ID
 
+  // Initialize map only once
   useEffect(() => {
-    // Initialize the map only once when the component mounts
     if (!map.current && mapContainer.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
@@ -22,147 +23,158 @@ const MapSection = ({ orderId }) => {
     }
   }, []);
 
+  // Handle orderId change
   useEffect(() => {
-    if (orderId) {
-      axios
-        .get(`https://cklogisticsco.onrender.com/backend/order/${orderId}/coordinates/`)
-        .then((response) => {
-          const { origin, destination, checkpoints } = response.data;
+    if (!orderId) return; // Early return if no orderId
 
-          // Remove previous markers
-          markers.forEach((marker) => marker.remove()); // Remove old markers
-          setMarkers([]); // Clear the markers state
+    const fetchData = async () => {
+      try {
+        // Clear previous markers and layers
+        markers.forEach((marker) => marker.remove());
+        setMarkers([]);
 
-          // Remove previous route layer if any
-          const layers = map.current.getStyle().layers;
-          layers.forEach((layer) => {
-            if (layer.id === "route") {
-              map.current.removeLayer("route");
-              map.current.removeSource("route");
-            }
-          });
+        // Remove previous route layer
+        const layers = map.current.getStyle().layers;
+        layers.forEach((layer) => {
+          if (layer.id === "route") {
+            map.current.removeLayer("route");
+            map.current.removeSource("route");
+          }
+        });
 
-          const newMarkers = [];
-          const locations = [origin, ...checkpoints, destination];
+        // Remove previous green path layer if it exists
+        if (greenPathLayerId) {
+          map.current.removeLayer(greenPathLayerId);
+          map.current.removeSource(greenPathLayerId);
+          setGreenPathLayerId(null); // Clear the previous layer ID
+        }
 
-          // Add markers for origin, checkpoints, and destination
-          locations.forEach((location) => {
-            const markerColor =
-              location === origin
-                ? "green"
-                : location === destination
-                ? "red"
-                : "blue";
+        // Fetch order data
+        const { data } = await axios.get(
+          `https://cklogisticsco.onrender.com/backend/order/${orderId}/coordinates/`
+        );
+        const { origin, destination, checkpoints } = data;
 
-            const marker = new mapboxgl.Marker({ color: markerColor })
-              .setLngLat([location.longitude, location.latitude])
-              .setPopup(new mapboxgl.Popup({ offset: 25 }).setText(location.name))
-              .addTo(map.current);
+        // Add new markers for origin, checkpoints, and destination
+        const locations = [origin, ...checkpoints, destination];
+        const newMarkers = [];
 
-            newMarkers.push(marker);
-          });
+        locations.forEach((location) => {
+          const markerColor =
+            location === origin
+              ? "green"
+              : location === destination
+              ? "red"
+              : "blue";
 
-          setMarkers(newMarkers); // Update state with new markers
+          const marker = new mapboxgl.Marker({ color: markerColor })
+            .setLngLat([location.longitude, location.latitude])
+            .setPopup(new mapboxgl.Popup({ offset: 25 }).setText(location.name))
+            .addTo(map.current);
 
-          // Adjust map bounds to fit all markers
-          const bounds = new mapboxgl.LngLatBounds();
-          locations.forEach((location) =>
-            bounds.extend([location.longitude, location.latitude])
-          );
-          map.current.fitBounds(bounds, { padding: 50 });
+          newMarkers.push(marker);
+        });
 
-          // Request route from the Directions API
-          const waypoints = locations.map(
-            (location) => [location.longitude, location.latitude]
-          );
+        setMarkers(newMarkers); // Update markers state
 
-          const routeUrl =
-            checkpoints.length > 0
-              ? `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints
-                  .map((point) => point.join(","))
-                  .join(";")}?geometries=geojson&access_token=${mapboxgl.accessToken}`
-              : `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+        // Adjust map bounds to fit all markers
+        const bounds = new mapboxgl.LngLatBounds();
+        locations.forEach((location) =>
+          bounds.extend([location.longitude, location.latitude])
+        );
+        map.current.fitBounds(bounds, { padding: 50 });
 
-          axios
-            .get(routeUrl)
-            .then((routeResponse) => {
-              const routeData = routeResponse.data.routes[0].geometry;
+        // Fetch route data from Mapbox Directions API
+        const waypoints = locations.map(
+          (location) => [location.longitude, location.latitude]
+        );
+        const routeUrl =
+          checkpoints.length > 0
+            ? `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints
+                .map((point) => point.join(","))
+                .join(";")}?geometries=geojson&access_token=${mapboxgl.accessToken}`
+            : `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
 
-              // Add the route as a line on the map
-              if (routeData) {
-                map.current.addLayer({
-                  id: "route",
-                  type: "line",
-                  source: {
-                    type: "geojson",
-                    data: {
-                      type: "Feature",
-                      properties: {},
-                      geometry: routeData,
-                    },
-                  },
-                  paint: {
-                    "line-color": "#ff0000",
-                    "line-width": 5,
-                  },
-                });
-              }
-            })
-            .catch((error) => console.error("Error fetching route:", error));
+        const routeResponse = await axios.get(routeUrl);
+        const routeData = routeResponse.data.routes[0].geometry;
 
-          // Fetch another marker and draw a green line from the origin to this marker
-          axios
-            .get("https://cklogisticsco.onrender.com/backend/coordinates/")
-            .then((anotherMarkerResponse) => {
-              const { longitude, latitude } = anotherMarkerResponse.data;
-
-              // Create the new marker (green)
-              const anotherMarker = new mapboxgl.Marker({ color: "green" })
-                .setLngLat([longitude, latitude])
-                .setPopup(new mapboxgl.Popup({ offset: 25 }).setText("Another Marker"))
-                .addTo(map.current);
-
-              newMarkers.push(anotherMarker); // Add this new marker
-
-              // Draw a green line from the origin to the new marker
-              const lineData = {
+        // Add the route as a line on the map
+        if (routeData) {
+          map.current.addLayer({
+            id: "route",
+            type: "line",
+            source: {
+              type: "geojson",
+              data: {
                 type: "Feature",
-                geometry: {
-                  type: "LineString",
-                  coordinates: [
-                    [origin.longitude, origin.latitude],
-                    [longitude, latitude],
-                  ],
-                },
                 properties: {},
-              };
+                geometry: routeData,
+              },
+            },
+            paint: {
+              "line-color": "#ff0000",
+              "line-width": 5,
+            },
+          });
+        }
 
-              map.current.addLayer({
-                id: "greenRoute",
-                type: "line",
-                source: {
-                  type: "geojson",
-                  data: lineData,
-                },
-                paint: {
-                  "line-color": "#00ff00", // Green color for the line
-                  "line-width": 5,
-                },
-              });
+        // Fetch another marker and draw green path
+        const anotherMarkerResponse = await axios.get(
+          "https://cklogisticsco.onrender.com/backend/coordinates/"
+        );
+        const { longitude, latitude } = anotherMarkerResponse.data;
 
-              // Adjust map bounds to fit all markers, including the new marker
-              const bounds = new mapboxgl.LngLatBounds();
-              locations.forEach((location) => bounds.extend([location.longitude, location.latitude]));
-              bounds.extend([longitude, latitude]); // Include the new marker's coordinates
-              map.current.fitBounds(bounds, { padding: 50 });
-            })
-            .catch((error) =>
-              console.error("Error fetching another marker coordinates:", error)
-            );
-        })
-        .catch((error) => console.error("Failed to fetch order data:", error));
-    }
-  }, [orderId]); // Only fetch data when `orderId` changes
+        // Create the new marker (green)
+        const anotherMarker = new mapboxgl.Marker({ color: "green" })
+          .setLngLat([longitude, latitude])
+          .setPopup(new mapboxgl.Popup({ offset: 25 }).setText("Another Marker"))
+          .addTo(map.current);
+
+        newMarkers.push(anotherMarker); // Add new marker
+
+        // Draw green path from origin to new marker
+        const lineData = {
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              [origin.longitude, origin.latitude],
+              [longitude, latitude],
+            ],
+          },
+          properties: {},
+        };
+
+        const newGreenPathLayerId = "greenRoute-" + Date.now(); // Unique layer ID
+        map.current.addLayer({
+          id: newGreenPathLayerId,
+          type: "line",
+          source: {
+            type: "geojson",
+            data: lineData,
+          },
+          paint: {
+            "line-color": "#00ff00", // Green color
+            "line-width": 5,
+          },
+        });
+
+        setGreenPathLayerId(newGreenPathLayerId); // Set new green path layer ID
+
+        // Adjust map bounds to fit all markers including new one
+        const finalBounds = new mapboxgl.LngLatBounds();
+        locations.forEach((location) =>
+          finalBounds.extend([location.longitude, location.latitude])
+        );
+        finalBounds.extend([longitude, latitude]); // Include the new marker
+        map.current.fitBounds(finalBounds, { padding: 50 });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [orderId]); // Re-run when `orderId` changes
 
   return <div ref={mapContainer} style={{ width: "100%", height: "500px" }} />;
 };
