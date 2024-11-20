@@ -102,7 +102,7 @@ def register(request):
     try:
         data = request.data
         username = data['username']
-
+        email = data.get('email')
         password = data['password']
         print(data)
 
@@ -111,7 +111,7 @@ def register(request):
 
         user = User.objects.create(
             username=username,
-
+            email = email,
             password=make_password(password),
         )
         user.save()
@@ -178,9 +178,9 @@ def login(request):
         print(data)
         username = data.get('username')
         password = data.get('password')
-        email = data.get('email')
         
-        user = authenticate(username=username, password=password,email=email)
+        
+        user = authenticate(username=username, password=password)
 
         if user is not None:
             
