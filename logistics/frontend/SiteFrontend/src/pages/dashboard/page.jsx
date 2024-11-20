@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import OrderList from "./OrderList";
 import MapSection from "./MapSection";
 
 const Dashboard = () => {
-  const [activeOrderId, setActiveOrderId] = useState("d45781"); 
-
+  const [activeOrder, setActiveOrder] = useState(null);
+  const [activeOrderId, setActiveOrderId] = useState("");
+  const { tracking_number, truck_plate, origin, status } = activeOrder || {};
+  useEffect(() => {
+    setActiveOrderId(activeOrderId);
+  }, [activeOrderId]);
   return (
     <div className="flex min-h-screen bg-gray-800 w-full">
       <Sidebar />
@@ -16,13 +20,17 @@ const Dashboard = () => {
           <div className="md:px-6 py-6 md:col-span-4 lg:col-span-3">
             {/* Pass the activeOrderId and setActiveOrderId to OrderList */}
             <OrderList
+              activeOrder={activeOrder}
               activeOrderId={activeOrderId}
+              setActiveOrder={setActiveOrder}
               setActiveOrderId={setActiveOrderId}
             />
           </div>
           <div className="md:px-6 py-6 md:col-span-8 lg:col-span-9">
             {/* Pass the activeOrderId to MapSection */}
-            <MapSection orderId={activeOrderId} />
+            {activeOrderId && (
+              <MapSection order={activeOrderId} statuss={status} />
+            )}
           </div>
         </div>
       </div>

@@ -13,9 +13,15 @@ const OrderCard = ({
   onClick,
 }) => {
   // Check if checkpoints are available and format them into a string
-  const checkpointLocations = checkpoints && checkpoints.length > 0
-    ? checkpoints.map((checkpoint) => `${checkpoint.name} (${checkpoint.latitude}, ${checkpoint.longitude})`).join(", ")
-    : "No checkpoints available";
+  const checkpointLocations =
+    checkpoints && checkpoints.length > 0
+      ? checkpoints
+          .map(
+            (checkpoint) =>
+              `${checkpoint.name} (${checkpoint.latitude}, ${checkpoint.longitude})`
+          )
+          .join(", ")
+      : "No checkpoints available";
 
   return (
     <div
@@ -70,7 +76,7 @@ const OrderCard = ({
   );
 };
 
-const OrderList = ({ activeOrderId, setActiveOrderId }) => {
+const OrderList = ({ activeOrderId, setActiveOrderId, setActiveOrder }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -144,7 +150,12 @@ const OrderList = ({ activeOrderId, setActiveOrderId }) => {
   useEffect(() => {
     fetchOrders();
   }, []);
-
+  // Set first order active
+  useEffect(() => {
+    if (orders.length > 0) {
+      setActiveOrderId(orders[0].tracking_number); // Set the first order as active initially
+    }
+  }, [orders]);
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -171,7 +182,10 @@ const OrderList = ({ activeOrderId, setActiveOrderId }) => {
               checkpoints={order.checkpoints} // Assuming checkpoints is an array of objects
               orderStatus={order.status}
               isActive={order.tracking_number === activeOrderId}
-              onClick={() => setActiveOrderId(order.tracking_number)}
+              onClick={() => {
+                setActiveOrder(order);
+                setActiveOrderId(order.tracking_number);
+              }}
             />
           ))
         )}

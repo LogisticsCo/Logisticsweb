@@ -5,11 +5,11 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-const MapSection = ({ orderId }) => {
+const MapSection = ({ order, statuss }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [markers, setMarkers] = useState([]); // Keep track of markers
-  const [status, setStatus] = useState("checking"); // Order status (checking by default)
+  const [status, setStatus] = useState(""); // Order status (checking by default)
 
   // Initialize the map only once
   useEffect(() => {
@@ -25,7 +25,7 @@ const MapSection = ({ orderId }) => {
 
   // Handle orderId change
   useEffect(() => {
-    if (!orderId) return; // Early return if no orderId
+    if (!order) return; // Early return if no orderId
 
     const fetchData = async () => {
       try {
@@ -47,7 +47,7 @@ const MapSection = ({ orderId }) => {
 
         // Fetch order data
         const { data } = await axios.get(
-          `https://cklogisticsco.onrender.com/backend/order/${orderId}/coordinates/`
+          `https://cklogisticsco.onrender.com/backend/order/${order}/coordinates/`
         );
         const { origin, destination, checkpoints } = data;
 
@@ -81,9 +81,10 @@ const MapSection = ({ orderId }) => {
         map.current.fitBounds(bounds, { padding: 50 });
 
         // Fetch route data from Mapbox Directions API
-        const waypoints = locations.map(
-          (location) => [location.longitude, location.latitude]
-        );
+        const waypoints = locations.map((location) => [
+          location.longitude,
+          location.latitude,
+        ]);
         const routeUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints
           .map((point) => point.join(","))
           .join(";")}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
@@ -113,7 +114,7 @@ const MapSection = ({ orderId }) => {
 
         // Fetch live coordinates
         const liveResponse = await axios.get(
-          `https://cklogisticsco.onrender.com/backend/coordinates/?order_id=${orderId}`
+          `https://cklogisticsco.onrender.com/backend/coordinates/?order_id=${order}`
         );
         const liveCoordinates = liveResponse.data.coordinates.map((coord) => [
           coord.longitude,
@@ -124,7 +125,9 @@ const MapSection = ({ orderId }) => {
 
         // Latest coordinate
         const latestCoordinates =
-          liveResponse.data.coordinates[liveResponse.data.coordinates.length - 1];
+          liveResponse.data.coordinates[
+            liveResponse.data.coordinates.length - 1
+          ];
         const { longitude, latitude } = latestCoordinates;
 
         // Add latest marker
@@ -183,13 +186,13 @@ const MapSection = ({ orderId }) => {
         ) {
           setStatus("completed");
           await axios.post(
-            `https://cklogisticsco.onrender.com/backend/order/${orderId}/status/`,
+            `https://cklogisticsco.onrender.com/backend/order/${order}/status/`,
             { status: "Completed" }
           );
         } else {
           setStatus("active");
           await axios.post(
-            `https://cklogisticsco.onrender.com/backend/order/${orderId}/status/`,
+            `https://cklogisticsco.onrender.com/backend/order/${order}/status/`,
             { status: "Active" }
           );
         }
@@ -199,12 +202,44 @@ const MapSection = ({ orderId }) => {
     };
 
     fetchData();
-  }, [orderId]);
+  }, [order]);
 
   return (
-    <div>
+    <div className="bg-gray-700/50 md:rounded-3xl w-full h-full mx-auto border border-gray-700 overflow-hidden">
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 bg-gray-800 text-white border-b border-gray-700">
+        <div>
+          <span className="text-lg font-bold">Order ID: {order}</span>
+          {statuss && (
+            <span
+              className={`ml-2 text-sm ${
+                statuss === "In Transit" ? "text-green-500" : "text-yellow-500"
+              }`}
+            >
+              ({statuss})
+            </span>
+          )}
+        </div>
+        <div className="flex gap-4">
+          <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded">
+            Call Driver
+          </button>
+          <button className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded">
+            Chat with Driver
+          </button>
+        </div>
+      </div>
+      {/* Tabs */}
+      <div className="flex justify-around bg-gray-800 text-gray-400 py-2 border-b border-gray-700">
+        {["Shipping Info", "Vehicle Info", "Documents", "Company", "Bill"].map(
+          (tab) => (
+            <button key={tab} className="hover:text-white">
+              {tab}
+            </button>
+          )
+        )}
+      </div>
       <div ref={mapContainer} style={{ width: "100%", height: "500px" }} />
-      <p>Status: {status}</p> {/* Display the status */}
     </div>
   );
 };
