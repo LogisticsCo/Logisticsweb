@@ -174,7 +174,7 @@ const MapSection = ({ orderId }) => {
     };
 
     fetchData();
-  }, [orderId]); // Re-run when `orderId` changes
+  }, [orderId]); 
 
   return <div ref={mapContainer} style={{ width: "100%", height: "500px" }} />;
 };
