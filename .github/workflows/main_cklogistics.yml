@@ -28,12 +28,25 @@ jobs:
           source venv/bin/activate
       
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          cd logistics
+          pip install -r requirements.txt
         
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+     env:
+          MAPBOX: "${{ secrets.MAPBOX }}"
+          DATABASECREDS: "${{ secrets.DATABASECREDS }}"
+          SECRET_KEY: "${{ secrets.SECRET_KEY }}"
+          DEBUG: "True"
+        run: |
+          cd logistics
+          python manage.py check
+          python manage.py migrate
+          python manage.py collectstatic --noinput
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: |
+           cd logistics
+           zip release.zip ./* -r
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
