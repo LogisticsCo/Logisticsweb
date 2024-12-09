@@ -31,8 +31,9 @@ jobs:
         run: |
           cd logistics
           pip install -r requirements.txt
-        
-     env:
+
+      - name: startup command
+        env:
           MAPBOX: "${{ secrets.MAPBOX }}"
           DATABASECREDS: "${{ secrets.DATABASECREDS }}"
           SECRET_KEY: "${{ secrets.SECRET_KEY }}"
