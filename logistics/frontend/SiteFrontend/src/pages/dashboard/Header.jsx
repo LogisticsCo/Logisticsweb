@@ -182,7 +182,7 @@ const Header = () => {
             className="bg-blue-500 text-white rounded-lg px-4 py-2 flex items-center"
           >
             <FaPlus className="mr-2" />
-            Add New Truck
+            Track Consignment
           </button>
           <img
             src="/profile2.png"
