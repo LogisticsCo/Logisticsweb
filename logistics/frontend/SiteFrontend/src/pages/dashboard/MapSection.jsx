@@ -221,9 +221,7 @@ const MapSection = ({ order, statuss }) => {
           )}
         </div>
         <div className="flex gap-4">
-          <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded">
-            Call Driver
-          </button>
+          
           <button
             className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded"
             onClick={handleChatWithDriver}
@@ -232,16 +230,8 @@ const MapSection = ({ order, statuss }) => {
           </button>
         </div>
       </div>
-      {/* Tabs */}
-      <div className="flex justify-around bg-gray-800 text-gray-400 py-2 border-b border-gray-700">
-        {["Shipping Info", "Vehicle Info", "Documents", "Company", "Bill"].map(
-          (tab) => (
-            <button key={tab} className="hover:text-white">
-              {tab}
-            </button>
-          )
-        )}
-      </div>
+     
+      
       {/* Map */}
       <div ref={mapContainer} style={{ width: "100%", height: "500px" }} />
 
