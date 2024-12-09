@@ -28,7 +28,7 @@ function Signup() {
 
     try {
       const response = await fetch(
-        "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/register/",
+        "https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/register/",
         {
           method: "POST",
           headers: {

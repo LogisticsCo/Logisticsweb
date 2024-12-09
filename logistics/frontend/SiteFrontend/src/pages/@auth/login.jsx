@@ -29,7 +29,7 @@ const Login = () => {
     setError("");
     try {
       const response = await fetch(
-        "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/login/",
+        "https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/login/",
         {
           method: "POST",
           headers: {
@@ -70,7 +70,7 @@ const Login = () => {
 
     try {
       const response = await fetch(
-        "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/forgot-password/",
+        "https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/forgot-password/",
         {
           method: "POST",
           headers: {

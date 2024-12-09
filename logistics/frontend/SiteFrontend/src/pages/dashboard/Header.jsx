@@ -83,7 +83,7 @@ const Header = () => {
       if (!refreshToken) throw new Error("Refresh token is missing");
 
       const response = await axios.post(
-        "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/token/refresh/",
+        "https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/token/refresh/",
         { refresh: refreshToken },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -113,7 +113,7 @@ const Header = () => {
       let accessToken = localStorage.getItem("accessToken");
 
       let response = await axios.post(
-        "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/create-order/",
+        "https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/create-order/",
         dataToSend,
         {
           headers: {
@@ -134,7 +134,7 @@ const Header = () => {
         if (newAccessToken) {
           try {
             const response = await axios.post(
-              "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/create-order/",
+              "https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/create-order/",
               dataToSend,
               {
                 headers: {
