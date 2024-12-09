@@ -8,50 +8,45 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 const MapSection = ({ order, statuss }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [markers, setMarkers] = useState([]); // Keep track of markers
-  const [status, setStatus] = useState(""); // Order status (checking by default)
+  const [markers, setMarkers] = useState([]);
+  const [status, setStatus] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("+1234567890");
+  const [message, setMessage] = useState("");
 
-  // Initialize the map only once
   useEffect(() => {
     if (!map.current && mapContainer.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/streets-v11",
-        center: [37.012128, -1.100903], // Default center (Juja, Kenya)
+        center: [37.012128, -1.100903],
         zoom: 10,
       });
     }
   }, []);
 
-  // Handle orderId change
   useEffect(() => {
-    if (!order) return; // Early return if no orderId
+    if (!order) return;
 
     const fetchData = async () => {
       try {
-        // Clear previous markers
         markers.forEach((marker) => marker.remove());
         setMarkers([]);
 
-        // Remove previous route layer if it exists
         if (map.current.getLayer("route")) {
           map.current.removeLayer("route");
           map.current.removeSource("route");
         }
 
-        // Remove previous green path layer if it exists
         if (map.current.getLayer("greenRoute")) {
           map.current.removeLayer("greenRoute");
           map.current.removeSource("greenRouteSource");
         }
 
-        // Fetch order data
         const { data } = await axios.get(
           `https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/order/${order}/coordinates/`
         );
         const { origin, destination, checkpoints } = data;
-
-        // Add new markers for origin, checkpoints, and destination
         const locations = [origin, ...checkpoints, destination];
         const newMarkers = [];
 
@@ -73,14 +68,12 @@ const MapSection = ({ order, statuss }) => {
 
         setMarkers(newMarkers);
 
-        // Adjust map bounds to fit all markers
         const bounds = new mapboxgl.LngLatBounds();
         locations.forEach((location) =>
           bounds.extend([location.longitude, location.latitude])
         );
         map.current.fitBounds(bounds, { padding: 50 });
 
-        // Fetch route data from Mapbox Directions API
         const waypoints = locations.map((location) => [
           location.longitude,
           location.latitude,
@@ -92,7 +85,6 @@ const MapSection = ({ order, statuss }) => {
         const routeResponse = await axios.get(routeUrl);
         const routeData = routeResponse.data.routes[0].geometry;
 
-        // Add the route layer if data exists
         if (routeData) {
           map.current.addLayer({
             id: "route",
@@ -112,7 +104,6 @@ const MapSection = ({ order, statuss }) => {
           });
         }
 
-        // Fetch live coordinates
         const liveResponse = await axios.get(
           `https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/coordinates/?order_id=${order}`
         );
@@ -121,16 +112,12 @@ const MapSection = ({ order, statuss }) => {
           coord.latitude,
         ]);
 
-        console.log("Extracted Coordinates:", liveCoordinates);
-
-        // Latest coordinate
         const latestCoordinates =
           liveResponse.data.coordinates[
             liveResponse.data.coordinates.length - 1
           ];
         const { longitude, latitude } = latestCoordinates;
 
-        // Add latest marker
         const latestMarker = new mapboxgl.Marker({ color: "green" })
           .setLngLat([longitude, latitude])
           .setPopup(
@@ -139,7 +126,6 @@ const MapSection = ({ order, statuss }) => {
           .addTo(map.current);
         newMarkers.push(latestMarker);
 
-        // Update green path
         const greenPathData = {
           type: "Feature",
           geometry: {
@@ -165,13 +151,12 @@ const MapSection = ({ order, statuss }) => {
             type: "line",
             source: "greenRouteSource",
             paint: {
-              "line-color": "#00ff00", // Green color
+              "line-color": "#00ff00",
               "line-width": 5,
             },
           });
         }
 
-        // Adjust map bounds for the latest point
         const finalBounds = new mapboxgl.LngLatBounds();
         locations.forEach((location) =>
           finalBounds.extend([location.longitude, location.latitude])
@@ -179,7 +164,6 @@ const MapSection = ({ order, statuss }) => {
         finalBounds.extend([longitude, latitude]);
         map.current.fitBounds(finalBounds, { padding: 50 });
 
-        // Update status
         if (
           latitude === destination.latitude &&
           longitude === destination.longitude
@@ -204,19 +188,35 @@ const MapSection = ({ order, statuss }) => {
     fetchData();
   }, [order]);
 
+  const handleChatWithDriver = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSendMessage = () => {
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+    window.open(whatsappUrl, "_blank");
+    closeModal();
+  };
+
   return (
     <div className="bg-gray-700/50 md:rounded-3xl w-full h-full mx-auto border border-gray-700 overflow-hidden">
       {/* Header */}
       <div className="flex justify-between items-center p-4 bg-gray-800 text-white border-b border-gray-700">
         <div>
           <span className="text-lg font-bold">Order ID: {order}</span>
-          {statuss && (
+          {status && (
             <span
               className={`ml-2 text-sm ${
-                statuss === "In Transit" ? "text-green-500" : "text-yellow-500"
+                status === "completed" ? "text-green-500" : "text-yellow-500"
               }`}
             >
-              ({statuss})
+              ({status})
             </span>
           )}
         </div>
@@ -224,7 +224,10 @@ const MapSection = ({ order, statuss }) => {
           <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded">
             Call Driver
           </button>
-          <button className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded">
+          <button
+            className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded"
+            onClick={handleChatWithDriver}
+          >
             Chat with Driver
           </button>
         </div>
@@ -239,7 +242,48 @@ const MapSection = ({ order, statuss }) => {
           )
         )}
       </div>
+      {/* Map */}
       <div ref={mapContainer} style={{ width: "100%", height: "500px" }} />
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-4 rounded-lg shadow-lg w-80">
+            <h2 className="text-lg font-bold mb-4">Chat with Driver</h2>
+            <div className="mb-4">
+              <label className="block text-sm font-semibold mb-2">Phone Number</label>
+              <input
+                type="text"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-semibold mb-2">Message</label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="flex justify-between">
+              <button
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
+                onClick={closeModal}
+              >
+                Close
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                onClick={handleSendMessage}
+              >
+                Send Message
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
