@@ -55,6 +55,48 @@ def update_order_status(request, order_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Order, Coordinates
+from django.template.loader import render_to_string
+
+@permission_classes([AllowAny])
+def send_email(request):
+    if request.method == 'POST':
+        order_number = request.data.get('orderNumber')
+        email = request.data.get('email')
+
+        if not order_number or not email:
+            return JsonResponse({'message': 'Order number and email are required'}, status=400)
+
+        order = get_object_or_404(Order, tracking_number=order_number)
+        coordinates = Coordinates.objects.filter(order_id=order_number)
+
+        coordinates_info = "\n".join(
+            [f"Latitude: {coord.latitude}, Longitude: {coord.longitude}, Date: {coord.created_at}" for coord in coordinates]
+        )
+
+        email_content = render_to_string(
+            'emails/order_update_email.html',
+            {
+                'order': order,
+                'coordinates_info': coordinates_info,
+            }
+        )
+
+        try:
+            send_mail(
+                'Order Information Update',
+                email_content,
+                'frandelwanjawa19@gmail.com',
+                [email],
+                fail_silently=False,
+            )
+            return JsonResponse({'message': 'Email sent successfully!'}, status=200)
+        except Exception as e:
+            return JsonResponse({'message': f"Error sending email: {str(e)}"}, status=500)
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def refresh_access_token(request):
