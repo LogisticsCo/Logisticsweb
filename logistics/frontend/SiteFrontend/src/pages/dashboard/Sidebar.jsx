@@ -16,9 +16,7 @@ const Sidebar = () => {
   // Sidebar items
   const items = [
     { id: "home", icon: <FaHome />, tooltip: "Dashboard" },
-    { id: "profile", icon: <FaUser />, tooltip: "Profile" },
-    { id: "discounts", icon: <FaPercent />, tooltip: "Discounts" },
-    { id: "messages", icon: <FaComment />, tooltip: "Messages" },
+   
     { id: "inventory", icon: <FaBox />, tooltip: "Inventory" },
   ];
   const handleSignOut = () => {
