@@ -28,7 +28,11 @@ import string
 from django.core.mail import send_mail
 from dotenv import load_dotenv
 from django.shortcuts import get_object_or_404
-
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Order, Coordinates
+from django.template.loader import render_to_string
 
 
 load_dotenv()
@@ -55,12 +59,8 @@ def update_order_status(request, order_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-from django.core.mail import send_mail
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from .models import Order, Coordinates
-from django.template.loader import render_to_string
 
+@csrf_exempt
 @permission_classes([AllowAny])
 def send_email(request):
     if request.method == 'POST':
