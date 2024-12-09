@@ -88,7 +88,7 @@ const OrderList = ({ activeOrderId, setActiveOrderId, setActiveOrder }) => {
         throw new Error("No refresh token found");
       }
       const response = await axios.post(
-        "https://cklogisticsco.onrender.com/backend/token/refresh/",
+        "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/token/refresh/",
         { refresh: refreshToken },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -110,7 +110,7 @@ const OrderList = ({ activeOrderId, setActiveOrderId, setActiveOrder }) => {
       }
 
       const response = await axios.get(
-        "https://cklogisticsco.onrender.com/backend/trucks/",
+        "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/trucks/",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -125,7 +125,7 @@ const OrderList = ({ activeOrderId, setActiveOrderId, setActiveOrder }) => {
         try {
           const newAccessToken = await refreshAccessToken();
           const response = await axios.get(
-            "https://cklogisticsco.onrender.com/backend/trucks/",
+            "https://https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/trucks/",
             {
               headers: {
                 Authorization: `Bearer ${newAccessToken}`,

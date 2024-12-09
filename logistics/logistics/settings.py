@@ -17,7 +17,7 @@ ALLOWED_HOSTS = [
     'cklogisticsco.onrender.com',
     'localhost',
     '127.0.0.1',
-    'cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net']
+     'cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net',]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
