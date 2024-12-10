@@ -60,8 +60,9 @@ def update_order_status(request, order_id):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-@csrf_exempt
+
 @permission_classes([AllowAny])
+@csrf_exempt
 def send_email(request):
     if request.method == 'POST':
         order_number = request.data.get('orderNumber')
@@ -376,10 +377,10 @@ def create_order(request):
 class ForgotPasswordAPIView(APIView):
     
     def post(self, request, *args, **kwargs):
-        # Get email from the request data
+        
         email = request.data.get('email')  
 
-        # If email is not provided, return error
+        
         if not email:
             return Response({'error': 'Email is required.'}, status=400)
 
