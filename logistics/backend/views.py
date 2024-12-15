@@ -428,6 +428,7 @@ def save_coordinates(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+            print(data)
             latitude = data.get('lat')
             longitude = data.get('lon')
             order_id = data.get('od')
