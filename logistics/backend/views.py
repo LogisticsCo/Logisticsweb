@@ -65,8 +65,12 @@ def update_order_status(request, order_id):
 @csrf_exempt
 def send_email(request):
     if request.method == 'POST':
-        order_number = request.data.get('orderNumber')
-        email = request.data.get('email')
+        try:
+            body = json.loads(request.body)
+            order_number = body.get('orderNumber')
+            email = body.get('email')
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON'}, status=400)
 
         if not order_number or not email:
             return JsonResponse({'message': 'Order number and email are required'}, status=400)
