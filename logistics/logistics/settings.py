@@ -85,6 +85,7 @@ MIDDLEWARE = [
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",  
+    "https://cklogistics-b4nv.onrender.com/"
     "https://cklogistics.onrender.com/"
 ]
 
@@ -160,6 +161,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
+    'https://cklogistics-b4nv.onrender.com',
     'https://cklogistics.onrender.com',
     'http://localhost:5173',
    
