@@ -72,7 +72,6 @@ def send_email(request):
             return JsonResponse({'message': 'Order number and email are required'}, status=400)
 
         order = get_object_or_404(Order, tracking_number=order_number)
-
         coordinates = Coordinates.objects.filter(order_id=order_number)
 
         coordinates_info = ""
@@ -80,14 +79,18 @@ def send_email(request):
             coordinates_info = "\n".join(
                 [f"Latitude: {coord.latitude}, Longitude: {coord.longitude}, Date: {coord.created_at}" for coord in coordinates]
             )
+        else:
+            coordinates_info = "No coordinates available for this order."
 
-        email_content = render_to_string(
-            'emails/order_update_email.html',
-            {
-                'order': order,
-                'coordinates_info': coordinates_info,
-            }
-        )
+        email_content = f"""
+        Order Update:
+        
+        Order Number: {order.tracking_number}
+        Order Status: {order.status}
+
+        Coordinates Information:
+        {coordinates_info}
+        """
 
         try:
             send_mail(
