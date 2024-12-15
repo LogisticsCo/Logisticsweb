@@ -41,7 +41,7 @@ const Sidebar = () => {
 
   const handleSendEmail = async () => {
     try {
-      const response = await axios.post("https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/send-email/", {
+      const response = await axios.post("https://cklogisticsback.onrender.com/backend/send-email/", {
         orderNumber,
         email,
       });

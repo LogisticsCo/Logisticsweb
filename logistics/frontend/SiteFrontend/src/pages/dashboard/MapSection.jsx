@@ -44,7 +44,7 @@ const MapSection = ({ order, statuss }) => {
         }
 
         const { data } = await axios.get(
-          `https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/order/${order}/coordinates/`
+          `https://cklogisticsback.onrender.com/backend/order/${order}/coordinates/`
         );
         const { origin, destination, checkpoints } = data;
         const locations = [origin, ...checkpoints, destination];
@@ -105,7 +105,7 @@ const MapSection = ({ order, statuss }) => {
         }
 
         const liveResponse = await axios.get(
-          `https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/coordinates/?order_id=${order}`
+          `https://cklogisticsback.onrender.com/backend/coordinates/?order_id=${order}`
         );
         const liveCoordinates = liveResponse.data.coordinates.map((coord) => [
           coord.longitude,
@@ -170,13 +170,13 @@ const MapSection = ({ order, statuss }) => {
         ) {
           setStatus("completed");
           await axios.post(
-            `https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/order/${order}/status/`,
+            `https://cklogisticsback.onrender.com/backend/order/${order}/status/`,
             { status: "Completed" }
           );
         } else {
           setStatus("active");
           await axios.post(
-            `https://cklogistics-h9bxfpgsaqf3duab.canadacentral-01.azurewebsites.net/backend/order/${order}/status/`,
+            `https://cklogisticsback.onrender.com/backend/order/${order}/status/`,
             { status: "Active" }
           );
         }
