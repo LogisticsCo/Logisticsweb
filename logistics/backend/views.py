@@ -428,9 +428,9 @@ def save_coordinates(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            latitude = data.get('latitude')
-            longitude = data.get('longitude')
-            order_id = data.get('order_id')
+            latitude = data.get('lat')
+            longitude = data.get('lon')
+            order_id = data.get('od')
 
             if latitude is None or longitude is None or not order_id:
                 return JsonResponse({"error": "latitude, longitude, and order_id are required"}, status=400)
