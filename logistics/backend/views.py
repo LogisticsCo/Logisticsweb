@@ -470,20 +470,39 @@ def receive_mqtt_data(request):
         try:
             # Parse the JSON data from the request body
             data = json.loads(request.body)
-            
+
             # Extract the topic and payload
             topic = data.get('topic')
             payload = data.get('payload')
 
-            # Log or process the data as needed
+            # Log the received topic and payload
             print(f"Received Topic: {topic}")
             print(f"Received Payload: {payload}")
 
-            # Return a success response
-            return JsonResponse({'status': 'success', 'message': 'Data received successfully'})
+            # Separate the payload into key-value pairs using regex
+            parsed_data = dict(re.findall(r'(\w+)=([\w\.-]+)', payload))
 
-        except json.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+            # Extract od, lat, and lon from the parsed data
+            od = parsed_data.get('od')
+            lat = parsed_data.get('lat')
+            lon = parsed_data.get('lon')
 
-    # Return an error for unsupported HTTP methods
+            # Log the separated values
+            print(f"OD: {od}, Latitude: {lat}, Longitude: {lon}")
+
+            # Construct a response with the separated data
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Data received successfully',
+                'data': {
+                    'od': od,
+                    'lat': lat,
+                    'lon': lon
+                }
+            })
+        except Exception as e:
+            # Handle any errors during processing
+            print(f"Error: {e}")
+            return JsonResponse({'status': 'error', 'message': 'Invalid data format'}, status=400)
+
     return JsonResponse({'status': 'error', 'message': 'Invalid HTTP method'}, status=405)
