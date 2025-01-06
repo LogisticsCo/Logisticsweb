@@ -487,7 +487,8 @@ def receive_mqtt_data(request):
             od = parsed_data.get('od')
             lat = parsed_data.get('lat')
             lon = parsed_data.get('lon')
-
+            coordinates = Coordinates(latitude=lat, longitude=lon, order_id=od)
+            coordinates.save()
             # Log the separated values
             print(f"OD: {od}, Latitude: {lat}, Longitude: {lon}")
 
