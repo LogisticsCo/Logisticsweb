@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import login,register,receive_mqtt_data,TruckCreateView,update_order_status,refresh_access_token,send_email,save_coordinates,create_order,get_order_coordinates,ForgotPasswordAPIView
+from .views import login,register,receive_mqtt_data,get_checking_orders_tracking_numbers,TruckCreateView,update_order_status,refresh_access_token,send_email,save_coordinates,create_order,get_order_coordinates,ForgotPasswordAPIView
 
 
 urlpatterns = [
+     path('orders/checking/', get_checking_orders_tracking_numbers, name='get_checking_orders_tracking_numbers'),
     path('mqtt/receive/', receive_mqtt_data, name='receive_mqtt_data'),
     path('login/', login, name="homepage"),
     path('register/', register, name="location"),
