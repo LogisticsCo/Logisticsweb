@@ -462,3 +462,28 @@ def save_coordinates(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+
+@permission_classes([AllowAny])
+@csrf_exempt
+def receive_mqtt_data(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+            
+            # Extract the topic and payload
+            topic = data.get('topic')
+            payload = data.get('payload')
+
+            # Log or process the data as needed
+            print(f"Received Topic: {topic}")
+            print(f"Received Payload: {payload}")
+
+            # Return a success response
+            return JsonResponse({'status': 'success', 'message': 'Data received successfully'})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+
+    # Return an error for unsupported HTTP methods
+    return JsonResponse({'status': 'error', 'message': 'Invalid HTTP method'}, status=405)
