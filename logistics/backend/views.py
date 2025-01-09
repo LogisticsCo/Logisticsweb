@@ -510,15 +510,3 @@ def receive_mqtt_data(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid HTTP method'}, status=405)
 
 
-def get_checking_orders_tracking_numbers(request):
-    try:
-        # Get tracking numbers of orders with status 'checking', ordered
-        tracking_numbers = list(
-            Order.objects.filter(status="checking")
-            .order_by('tracking_number')
-            .values_list('tracking_number', flat=True)
-        )
-
-        return JsonResponse({"status": "success", "tracking_numbers": tracking_numbers})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=400)
